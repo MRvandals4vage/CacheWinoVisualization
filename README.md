@@ -1,73 +1,77 @@
-# React + TypeScript + Vite
+# CacheWinograd Visualization
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
 
-Currently, two official plugins are available:
+An interactive, high-fidelity visualization of **CacheWinograd**: a research-driven framework for optimizing Winograd convolutions on memory-constrained edge CPUs.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Overview
 
-## React Compiler
+Winograd convolutions are mathematically efficient but often underperform on edge devices due to the "Arithmetic Trap"—where reduction in MAC operations is negated by increased data movement and cache thrashing.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This project visualizes how **CacheWinograd** solves this by:
+1. **Runtime Cache Probing**: Detecting hardware constraints at initialization.
+2. **Adaptive Tile Selection**: Calculating the optimal tile size `m` that maximizes reuse while fitting in the L2 cache.
+3. **Fused Execution**: Combining transformation and inverse loops to eliminate DRAM round-trips.
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Framework**: [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: Vanilla CSS (Industrial Minimalist Theme)
+- **Typography**: [Source Serif 4](https://fonts.google.com/specimen/Source+Serif+4) for academic elegance.
+- **Animations**: CSS Transforms & Transitions with high-contrast Red/Silver palettes.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## ✨ Key Features
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Interactive Stepper**: Walk through the 4 core stages of the Winograd algorithm.
+- **Unified Matrix Flow**: A 3D-perspective animation showing real-time data transformation within the "HW Residency Boundary."
+- **Performance Metrics**: Comparative data across platforms like **Jetson Nano** and **Raspberry Pi 4**.
+- **Mobile Responsive**: Sleek transition from a sidebar navbar to a bottom navigation pill on mobile devices.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📦 Getting Started
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Installation
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/MRvandals4vage/CacheWinoVisualization.git
+   cd CacheWinoVisualization
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run in development mode:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## 📐 Architecture
+
+The project is structured into modular sections representing the research flow:
+- `/components/Hero`: Project introduction.
+- `/components/WinogradSection`: Algorithmic deep-dive.
+- `/components/ProblemSection`: Visualizing cache thrashing.
+- `/components/SolutionSection`: The CacheWinograd pipeline + Matrix Flow.
+- `/components/ResultsSection`: Quantitative benchmarks.
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+**Developed by Ishaan Upponi** 
+*Visualizing the next generation of edge AI optimization.*
