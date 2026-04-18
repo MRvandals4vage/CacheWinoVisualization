@@ -41,13 +41,14 @@ body {
   line-height: 1.7;
   overflow-x: hidden;
   padding-left: 100px; /* Sidebar space */
-  transition: padding 0.3s;
 }
 
 @media (max-width: 900px) {
   body {
-    padding-left: 0;
-    padding-bottom: 80px; /* Space for bottom nav */
+    padding-left: 0 !important;
+  }
+  nav {
+    display: none !important;
   }
 }
 
@@ -72,42 +73,6 @@ nav {
   padding: 32px 10px;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-}
-
-@media (max-width: 900px) {
-  nav {
-    left: 20px;
-    right: 20px;
-    top: auto;
-    bottom: 20px;
-    transform: none;
-    width: auto !important;
-    min-height: auto;
-    height: 70px;
-    flex-direction: row;
-    border-radius: 35px;
-    padding: 0 30px;
-    justify-content: space-around;
-  }
-  
-  .nav-logo, .nav-pill {
-    display: none;
-  }
-  
-  .nav-links {
-    flex-direction: row !important;
-    gap: 0 !important;
-    justify-content: space-between;
-    width: 100%;
-  }
-  
-  .nav-links li {
-    width: auto !important;
-  }
-  
-  .nav-links a span {
-    display: none;
-  }
 }
 
 nav:hover {
