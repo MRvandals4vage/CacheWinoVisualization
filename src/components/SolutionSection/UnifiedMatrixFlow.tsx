@@ -58,30 +58,41 @@ const UnifiedMatrixFlow: React.FC = () => {
         <div className="cache-residency-zone" style={{ 
           position: 'absolute', 
           width: 'calc(100% - 10px)', 
-          height: isMobile ? '580px' : '660px', 
-          border: '1px solid var(--border2)', 
-          background: 'rgba(5, 5, 10, 0.9)',
+          height: isMobile ? '560px' : '660px', 
+          border: '1px solid var(--border)', 
+          background: 'rgba(10, 10, 15, 0.95)',
           backdropFilter: 'blur(30px)',
-          borderRadius: isMobile ? '24px' : '64px',
+          borderRadius: isMobile ? '32px' : '64px',
           zIndex: 0,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: isMobile ? 'center' : 'flex-start',
-          padding: isMobile ? '0' : '24px'
+          justifyContent: 'flex-start',
+          paddingTop: isMobile ? '20px' : '40px'
         }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '10px' : '13px', color: 'var(--accent2)', letterSpacing: '0.4em', opacity: 0.6, fontWeight: 'bold', marginBottom: isMobile ? '15px' : '0' }}>
-            HW RESIDENCY BOUNDARY
+          <div style={{ 
+            fontFamily: 'var(--font-mono)', 
+            fontSize: isMobile ? '9px' : '13px', 
+            color: 'var(--accent2)', 
+            letterSpacing: '0.4em', 
+            opacity: 0.5, 
+            fontWeight: 'bold',
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            paddingBottom: '8px',
+            marginBottom: '20px'
+          }}>
+            L2 CACHE BOUNDARY
           </div>
         </div>
 
+        {/* MATRIX STACK */}
         <div className="matrix-stack" style={{ 
           display: 'flex', 
           flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '22px' : '100px', 
+          gap: isMobile ? '30px' : '100px', 
           zIndex: 1, 
-          transform: isMobile ? 'none' : 'rotateX(8deg) rotateY(-2deg)', 
-          transformStyle: 'preserve-3d'
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           
           {phases.map((p, i) => {
@@ -93,61 +104,61 @@ const UnifiedMatrixFlow: React.FC = () => {
                 display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center', 
-                transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                opacity: isActive ? 1 : (isMobile ? 0.25 : 0.04), 
-                transform: isActive ? (isMobile ? 'none' : 'translateZ(40px) scale(1.05)') : 'none',
-                position: 'relative'
+                transition: 'all 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
+                opacity: isActive ? 1 : (isMobile ? 0.3 : 0.05), 
+                position: 'relative',
+                transform: isActive && !isMobile ? 'translateZ(40px) scale(1.05)' : 'none'
               }}>
+                {/* LABEL */}
                 <div style={{ 
-                  position: 'absolute', 
-                  top: isMobile ? '-14px' : '-100px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: isMobile ? '160px' : '140px', 
-                  textAlign: 'center',
-                  transition: 'all 0.4s',
-                  color: isActive ? 'var(--accent)' : 'var(--text3)'
+                  fontFamily: 'var(--font-mono)', 
+                  fontSize: isMobile ? '9px' : '12px', 
+                  fontWeight: 600, 
+                  textTransform: 'uppercase',
+                  color: isActive ? 'var(--accent)' : 'var(--text3)',
+                  marginBottom: '10px',
+                  letterSpacing: '0.05em'
                 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '8px' : '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>{p.title}</div>
+                  {p.title}
                 </div>
 
+                {/* THE MATRIX */}
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: `repeat(${size}, ${isMobile ? '16px' : '20px'})`, 
+                  gridTemplateColumns: `repeat(${size}, ${isMobile ? '16px' : '22px'})`, 
                   gap: '3px',
                   background: '#000',
-                  padding: isMobile ? '6px' : '8px',
+                  padding: isMobile ? '8px' : '12px',
                   borderRadius: '10px',
-                  border: `1.5px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
-                  boxShadow: isActive ? `0 0 50px ${p.color}33` : 'none',
-                  position: 'relative',
+                  border: `1.5px solid ${isActive ? p.color : 'rgba(255,255,255,0.08)'}`,
+                  boxShadow: isActive ? `0 0 40px ${p.color}22` : 'none',
                   transition: 'all 0.4s'
                 }}>
                   {Array.from({ length: size * size }).map((_, j) => (
                     <div key={j} style={{ 
-                      width: isMobile ? '16px' : '20px', 
-                      height: isMobile ? '16px' : '20px', 
-                      background: isActive ? p.color : '#080808',
-                      opacity: isActive ? (0.6 + (Math.sin(j + step * 2) * 0.4)) : 0.05,
+                      width: isMobile ? '16px' : '22px', 
+                      height: isMobile ? '16px' : '22px', 
+                      background: isActive ? p.color : '#111',
+                      opacity: isActive ? (0.6 + (Math.sin(j + step * 2) * 0.4)) : 0.1,
                       borderRadius: '2px',
-                      transition: 'all 0.5s'
+                      transition: 'all 0.4s'
                     }}></div>
                   ))}
                 </div>
 
+                {/* FLOW ARROW */}
                 {i < phases.length - 1 && (
                   <div style={{ 
                     position: 'absolute', 
                     right: isMobile ? 'auto' : '-70px',
-                    bottom: isMobile ? '-24px' : 'auto', 
-                    top: isMobile ? 'auto' : '15px', 
-                    fontSize: '18px', 
+                    bottom: isMobile ? '-32px' : 'auto', 
+                    top: isMobile ? 'auto' : '50%', 
+                    transform: isMobile ? 'none' : 'translateY(-50%)',
+                    fontSize: isMobile ? '16px' : '20px', 
                     color: isActive ? (phases[i+1]?.color || 'var(--accent)') : 'var(--text3)',
-                    transform: isMobile ? 'rotate(90deg)' : 'none',
-                    animation: isActive && !isMobile ? 'pulse-arrow 1s infinite' : 'none',
-                    opacity: isActive ? 0.6 : 0.05
+                    opacity: isActive ? 0.8 : 0.1
                   }}>
-                    ↓
+                    {isMobile ? '↓' : '→'}
                   </div>
                 )}
               </div>
