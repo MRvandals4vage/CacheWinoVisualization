@@ -85,25 +85,28 @@ const UnifiedMatrixFlow: React.FC = () => {
                   <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '5px' }}>{p.subtitle}</div>
                 </div>
 
-                {/* THE MATRIX - Optimized size with vibrant red active state */}
+                {/* THE MATRIX - Multi-color and Patterned for Clarity */}
                 <div style={{ 
                   display: 'grid', 
                   gridTemplateColumns: `repeat(${size}, 22px)`, 
                   gap: '4px',
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  padding: '10px',
-                  borderRadius: '10px',
-                  border: `2px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
-                  boxShadow: isActive ? `0 0 60px rgba(255, 0, 0, 0.2)` : 'none',
-                  position: 'relative'
+                  background: '#000',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: `2px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
+                  boxShadow: isActive ? `0 0 60px ${p.color}33` : 'none',
+                  position: 'relative',
+                  transition: 'all 0.4s'
                 }}>
                   {Array.from({ length: size * size }).map((_, j) => (
                     <div key={j} style={{ 
                       width: '22px', 
                       height: '22px', 
-                      background: isActive ? 'var(--accent)' : 'var(--bg3)',
-                      opacity: isActive ? (0.7 + Math.random() * 0.3) : 0.03,
-                      borderRadius: '3px'
+                      // Use phase-specific color with randomized "data" intensity
+                      background: isActive ? p.color : '#080808',
+                      opacity: isActive ? (0.6 + (Math.sin(j + step) * 0.4)) : 0.05,
+                      borderRadius: '2px',
+                      transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}></div>
                   ))}
                 </div>
