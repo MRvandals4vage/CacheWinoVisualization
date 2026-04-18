@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Reveal from '../Common/Reveal';
 import PipelineVis from './PipelineVis';
-import OptimizationVisualizer from './OptimizationVisualizer';
+import UnifiedMatrixFlow from './UnifiedMatrixFlow';
 import TileRaceVis from './TileRaceVis';
 import LoopOrderVis from './LoopOrderVis';
 import ComparisonPipelines from './ComparisonPipelines';
@@ -26,7 +26,7 @@ const SolutionSection: React.FC = () => {
       </Reveal>
 
       <Reveal>
-        <OptimizationVisualizer />
+        <UnifiedMatrixFlow />
       </Reveal>
 
       {/* Phase detail panels */}
