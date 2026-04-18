@@ -35,14 +35,14 @@ const UnifiedMatrixFlow: React.FC = () => {
 
   return (
     <div className="canvas-wrap" style={{ 
-      minHeight: isMobile ? '700px' : '1000px', 
+      minHeight: isMobile ? '600px' : '1000px', 
       display: 'flex', 
       flexDirection: 'column', 
-      perspective: '2000px', 
-      padding: isMobile ? '20px' : '60px', 
+      perspective: isMobile ? 'none' : '2000px', 
+      padding: isMobile ? '10px' : '60px', 
       overflow: 'hidden' 
     }}>
-      <div className="conv-vis-title" style={{ marginBottom: isMobile ? '40px' : '80px', fontSize: isMobile ? '16px' : '22px', textAlign: 'center', fontWeight: 600, letterSpacing: '0.1em' }}>
+      <div className="conv-vis-title" style={{ marginBottom: isMobile ? '20px' : '80px', fontSize: isMobile ? '16px' : '22px', textAlign: 'center', fontWeight: 600, letterSpacing: '0.1em' }}>
         Layer-by-Layer Data Transformation
       </div>
 
@@ -52,17 +52,17 @@ const UnifiedMatrixFlow: React.FC = () => {
         position: 'relative', 
         alignItems: 'center', 
         justifyContent: 'center', 
-        padding: isMobile ? '20px 0' : '150px 0' 
+        padding: isMobile ? '10px 0' : '150px 0' 
       }}>
         
         <div className="cache-residency-zone" style={{ 
           position: 'absolute', 
           width: '100%', 
-          height: isMobile ? '600px' : '660px', 
+          height: isMobile ? '520px' : '660px', 
           border: '1px solid var(--border2)', 
           background: 'rgba(5, 5, 10, 0.9)',
           backdropFilter: 'blur(30px)',
-          borderRadius: isMobile ? '32px' : '64px',
+          borderRadius: isMobile ? '24px' : '64px',
           zIndex: 0,
           display: 'flex',
           flexDirection: 'column',
@@ -78,9 +78,9 @@ const UnifiedMatrixFlow: React.FC = () => {
         <div className="matrix-stack" style={{ 
           display: 'flex', 
           flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '50px' : '100px', 
+          gap: isMobile ? '28px' : '100px', 
           zIndex: 1, 
-          transform: isMobile ? 'rotateX(5deg)' : 'rotateX(8deg) rotateY(-2deg)', 
+          transform: isMobile ? 'none' : 'rotateX(8deg) rotateY(-2deg)', 
           transformStyle: 'preserve-3d',
           paddingBottom: isMobile ? '0' : '40px'
         }}>
@@ -95,39 +95,39 @@ const UnifiedMatrixFlow: React.FC = () => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                opacity: isActive ? 1 : (isMobile ? 0.15 : 0.04), 
-                transform: isActive ? 'translateZ(80px) scale(1.15)' : 'translateZ(0) scale(1)',
+                opacity: isActive ? 1 : (isMobile ? 0.2 : 0.04), 
+                transform: isActive ? 'translateZ(40px) scale(1.05)' : 'translateZ(0) scale(0.9)',
                 position: 'relative'
               }}>
                 <div style={{ 
                   position: 'absolute', 
-                  top: isMobile ? '-20px' : '-100px',
-                  left: isMobile ? '120%' : '50%',
-                  transform: isMobile ? 'translateY(-50%)' : (isActive ? 'translate(-50%, -15px)' : 'translateX(-50%)'),
-                  width: isMobile ? '100px' : '140px', 
-                  textAlign: isMobile ? 'left' : 'center',
+                  top: isMobile ? '-18px' : '-100px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: isMobile ? '160px' : '140px', 
+                  textAlign: 'center',
                   transition: 'all 0.4s',
                   color: isActive ? 'var(--accent)' : 'var(--text3)'
                 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '10px' : '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>{p.title}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '9px' : '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>{p.title}</div>
                 </div>
 
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: `repeat(${size}, 22px)`, 
-                  gap: '4px',
+                  gridTemplateColumns: `repeat(${size}, 20px)`, 
+                  gap: '3px',
                   background: '#000',
-                  padding: '12px',
-                  borderRadius: '12px',
-                  border: `2px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
-                  boxShadow: isActive ? `0 0 60px ${p.color}33` : 'none',
+                  padding: '8px',
+                  borderRadius: '10px',
+                  border: `1.5px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
+                  boxShadow: isActive ? `0 0 50px ${p.color}33` : 'none',
                   position: 'relative',
                   transition: 'all 0.4s'
                 }}>
                   {Array.from({ length: size * size }).map((_, j) => (
                     <div key={j} style={{ 
-                      width: '22px', 
-                      height: '22px', 
+                      width: '20px', 
+                      height: '20px', 
                       background: isActive ? p.color : '#080808',
                       opacity: isActive ? (0.6 + (Math.sin(j + step * 2) * 0.4)) : 0.05,
                       borderRadius: '2px',
@@ -140,15 +140,15 @@ const UnifiedMatrixFlow: React.FC = () => {
                   <div style={{ 
                     position: 'absolute', 
                     right: isMobile ? 'auto' : '-70px',
-                    bottom: isMobile ? '-35px' : 'auto', 
+                    bottom: isMobile ? '-28px' : 'auto', 
                     top: isMobile ? 'auto' : '15px', 
-                    fontSize: '24px', 
+                    fontSize: '20px', 
                     color: isActive ? (phases[i+1]?.color || 'var(--accent)') : 'var(--text3)',
                     transform: isMobile ? 'rotate(90deg)' : 'none',
-                    animation: isActive ? (isMobile ? 'none' : 'pulse-arrow 1s infinite') : 'none',
-                    opacity: isActive ? 0.8 : 0.1
+                    animation: isActive && !isMobile ? 'pulse-arrow 1s infinite' : 'none',
+                    opacity: isActive ? 0.6 : 0.05
                   }}>
-                    →
+                    ↓
                   </div>
                 )}
               </div>
