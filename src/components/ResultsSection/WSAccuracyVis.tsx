@@ -33,7 +33,7 @@ const WSAccuracyVis: React.FC = () => {
                 </div>
               </div>
             ))}
-            <div style={{ marginTop: '10px', paddingAt: '10px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+            <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
               <div style={{ fontSize: '10px', color: 'var(--accent4)', fontFamily: 'var(--font-mono)' }}>base err: {errBase}%</div>
               <div style={{ fontSize: '10px', color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}>ext err: {errExt}%</div>
             </div>

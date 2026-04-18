@@ -4,9 +4,10 @@ interface RevealProps {
   children: React.ReactNode;
   className?: string;
   delay?: number;
+  style?: React.CSSProperties;
 }
 
-const Reveal: React.FC<RevealProps> = ({ children, className = '', delay = 0 }) => {
+const Reveal: React.FC<RevealProps> = ({ children, className = '', delay = 0, style }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,7 @@ const Reveal: React.FC<RevealProps> = ({ children, className = '', delay = 0 }) 
     <div
       ref={ref}
       className={`reveal ${isVisible ? 'visible' : ''} ${className}`}
+      style={style}
     >
       {children}
     </div>
