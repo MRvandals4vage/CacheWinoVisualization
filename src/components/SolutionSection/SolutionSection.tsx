@@ -35,17 +35,17 @@ const SolutionSection: React.FC = () => {
           <div className="canvas-wrap">
             <div className="conv-vis-title">Phase 1 — Runtime cache probing (once at initialisation)</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', margin: '20px 0' }}>
-              <div style={{ background: 'var(--bg3)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: '10px', padding: '20px' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent5)', marginBottom: '8px' }}>READ SYSFS</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text2)' }}>/sys/devices/system/<br />cpu/cpu0/cache/<br />index<span style={{ color: 'var(--accent5)' }}>1</span>/size</div>
-                <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: 600, color: 'var(--accent5)' }}>CL1 = 32 KB</div>
+              <div style={{ background: 'var(--bg3)', border: '1px solid var(--border2)', borderRadius: '10px', padding: '20px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent2)', marginBottom: '8px' }}>READ SYSFS</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text2)' }}>/sys/devices/system/<br />cpu/cpu0/cache/<br />index<span style={{ color: 'var(--accent2)' }}>1</span>/size</div>
+                <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: 600, color: 'var(--accent2)' }}>CL1 = 32 KB</div>
               </div>
-              <div style={{ background: 'var(--bg3)', border: '1px solid rgba(56,189,248,0.2)', borderRadius: '10px', padding: '20px' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent5)', marginBottom: '8px' }}>READ SYSFS</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text2)' }}>/sys/devices/system/<br />cpu/cpu0/cache/<br />index<span style={{ color: 'var(--accent5)' }}>2</span>/size</div>
-                <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: 600, color: 'var(--accent5)' }}>CL2 = 2 MB</div>
+              <div style={{ background: 'var(--bg3)', border: '1px solid var(--border2)', borderRadius: '10px', padding: '20px' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent2)', marginBottom: '8px' }}>READ SYSFS</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text2)' }}>/sys/devices/system/<br />cpu/cpu0/cache/<br />index<span style={{ color: 'var(--accent2)' }}>2</span>/size</div>
+                <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: 600, color: 'var(--accent2)' }}>CL2 = 2 MB</div>
               </div>
-              <div style={{ background: 'var(--bg3)', border: '1px solid rgba(110,231,183,0.2)', borderRadius: '10px', padding: '20px' }}>
+              <div style={{ background: 'var(--bg3)', border: '1px solid var(--accent)', borderRadius: '10px', padding: '20px' }}>
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', marginBottom: '8px' }}>SCHEDULING BUDGET</div>
                 <div style={{ fontSize: '13px', color: 'var(--text2)' }}>γ = 0.7<br /><span style={{ color: 'var(--text3)' }}>safety headroom</span></div>
                 <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: 600, color: 'var(--accent)' }}>C<sub>cache</sub> = 1.4 MB</div>
@@ -84,21 +84,21 @@ const SolutionSection: React.FC = () => {
             <TileRaceVis />
 
             {/* Fallback guard */}
-            <div style={{ marginTop: '20px', background: 'var(--bg3)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '12px', padding: '20px' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent4)', marginBottom: '12px', letterSpacing: '.1em' }}>TWO-CONDITION FALLBACK GUARD</div>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: '200px' }}>
-                  <div className="badge badge-red" style={{ marginBottom: '8px' }}>Condition 1</div>
-                  <div style={{ fontSize: '14px', color: 'var(--text2)' }}>R(m*) &lt; R<sub>min</sub> (0.35)<br /><span style={{ fontSize: '12px', color: 'var(--text3)' }}>Reuse efficiency too low — transform overhead not amortised</span></div>
+            <div style={{ marginTop: '20px', background: 'var(--bg3)', border: '1px solid var(--accent)', borderRadius: '12px', padding: '24px' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', marginBottom: '16px', letterSpacing: '.2em', fontWeight: 'bold' }}>RUNTIME FALLBACK GUARD</div>
+              <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '240px' }}>
+                  <div className="badge badge-red" style={{ marginBottom: '12px' }}>CONDITION 1: LOW REUSE</div>
+                  <div style={{ fontSize: '14px', color: 'var(--text2)' }}>R(m*) &lt; R<sub>min</sub> (0.35)<br /><span style={{ fontSize: '12px', color: 'var(--text3)' }}>Overhead per tile exceeds savings</span></div>
                 </div>
-                <div style={{ fontSize: '20px', color: 'var(--text3)', alignSelf: 'center' }}>OR</div>
-                <div style={{ flex: 1, minWidth: '200px' }}>
-                  <div className="badge badge-red" style={{ marginBottom: '8px' }}>Condition 2</div>
-                  <div style={{ fontSize: '14px', color: 'var(--text2)' }}>Cin × Cout &lt; 2048<br /><span style={{ fontSize: '12px', color: 'var(--text3)' }}>Insufficient channel depth — direct conv wins</span></div>
+                <div style={{ fontSize: '20px', color: 'var(--text3)', alignSelf: 'center', opacity: 0.5 }}>OR</div>
+                <div style={{ flex: 1, minWidth: '240px' }}>
+                  <div className="badge badge-red" style={{ marginBottom: '12px' }}>CONDITION 2: SHALLOW CHANNEL</div>
+                  <div style={{ fontSize: '14px', color: 'var(--text2)' }}>Cin × Cout &lt; 2048<br /><span style={{ fontSize: '12px', color: 'var(--text3)' }}>Direct convolution depth threshold</span></div>
                 </div>
-                <div style={{ fontSize: '20px', color: 'var(--text3)', alignSelf: 'center' }}>→</div>
+                <div style={{ fontSize: '20px', color: 'var(--accent)', alignSelf: 'center' }}>→</div>
                 <div style={{ alignSelf: 'center' }}>
-                  <div className="badge badge-amber">Fallback to direct conv</div>
+                  <div className="badge badge-red" style={{ padding: '10px 20px', background: 'var(--accent)', color: 'white', fontWeight: 'bold' }}>FALLBACK TO DIRECT</div>
                 </div>
               </div>
             </div>

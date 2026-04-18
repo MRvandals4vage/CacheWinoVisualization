@@ -17,8 +17,9 @@ const TileRaceVis: React.FC = () => {
         const pct = Math.min((ws / budget) * 100, 120);
         const isOpt = m === 6 && fits;
         
-        const color = !fits ? 'rgba(248,113,113,0.3)' : isOpt ? 'rgba(110,231,183,0.3)' : 'rgba(129,140,248,0.3)';
-        const textColor = !fits ? 'var(--accent4)' : isOpt ? 'var(--accent)' : 'var(--accent2)';
+        const color = !fits ? 'rgba(255, 0, 0, 0.05)' : isOpt ? 'var(--accent)' : 'var(--accent3)';
+        const textColor = !fits ? 'var(--accent)' : isOpt ? 'var(--text)' : 'var(--text2)';
+        const barBg = !fits ? 'rgba(100, 100, 100, 0.1)' : isOpt ? 'var(--accent)' : 'var(--surface2)';
 
         return (
           <div key={m} className="tile-row-vis">
@@ -28,21 +29,23 @@ const TileRaceVis: React.FC = () => {
                 className={`tile-bar-fill ${isOpt ? 'selected' : ''}`}
                 style={{ 
                   width: `${Math.min(pct, 100)}%`,
-                  background: color,
-                  color: textColor
+                  background: barBg,
+                  color: isOpt ? 'white' : textColor,
+                  border: isOpt ? 'none' : `1px solid ${color}`
                 }}
               >
-                {(ws / 1024).toFixed(0)} KB {isOpt ? ' ★ selected' : ''}
+                {(ws / 1024).toFixed(0)} KB {isOpt ? ' ← SELECTED' : ''}
               </div>
             </div>
             <span 
               className="tile-tag" 
               style={{ 
-                background: !fits ? 'rgba(248,113,113,0.1)' : isOpt ? 'rgba(110,231,183,0.1)' : 'rgba(129,140,248,0.1)',
-                color: textColor
+                background: isOpt ? 'var(--accent)' : 'var(--bg3)',
+                color: isOpt ? 'white' : textColor,
+                border: `1px solid ${color}`
               }}
             >
-              {!fits ? 'exceeds budget' : isOpt ? `R=${r.toFixed(2)} ← optimal` : `R=${r.toFixed(2)} fits`}
+              {!fits ? 'OUT OF BUDGET' : isOpt ? `R=${r.toFixed(2)}` : `R=${r.toFixed(2)}`}
             </span>
           </div>
         );

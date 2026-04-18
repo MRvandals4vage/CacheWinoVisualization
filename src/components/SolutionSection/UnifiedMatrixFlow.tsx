@@ -5,10 +5,10 @@ const UnifiedMatrixFlow: React.FC = () => {
 
   // Phases of the data flow
   const phases = [
-    { title: 'Input Tile X', subtitle: 'Raw spatial domain (4×4)', color: 'var(--accent5)' },
-    { title: 'Transformed X̂', subtitle: 'Winograd domain shift (4×4)', color: 'var(--accent2)' },
-    { title: 'Product Ŷ', subtitle: 'Pointwise Weight Mix (4×4)', color: 'var(--accent3)' },
-    { title: 'Output Tile Y', subtitle: 'Inverse spatial domain (2×2)', color: 'var(--accent)' }
+    { title: 'Input Tile X', subtitle: 'Raw spatial domain', color: 'var(--accent3)', data: [1,2,3,4] },
+    { title: 'Transformed X̂', subtitle: 'Winograd domain shift', color: 'var(--accent2)', data: [1,1,1,1] },
+    { title: 'Product Ŷ', subtitle: 'Pointwise Weight Mix', color: 'var(--accent2)', data: [2,2,2,2] },
+    { title: 'Output Tile Y', subtitle: 'Inverse spatial domain', color: 'var(--accent)', data: [4,4] },
   ];
 
   useEffect(() => {
@@ -26,14 +26,14 @@ const UnifiedMatrixFlow: React.FC = () => {
 
       <div className="flow-container" style={{ flex: 1, display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'center', padding: '150px 0' }}>
         
-        {/* THE "CACHE RESIDENT" ZONE - Large but content is now smaller */}
+        {/* THE "CACHE RESIDENT" ZONE - Intense Minimalist Container */}
         <div className="cache-residency-zone" style={{ 
           position: 'absolute', 
           width: '100%', 
           height: '660px', 
-          border: '1px solid rgba(110, 231, 183, 0.2)', 
-          background: 'rgba(5, 5, 10, 0.8)',
-          backdropFilter: 'blur(16px)',
+          border: '1px solid var(--border2)', 
+          background: 'rgba(5, 5, 10, 0.9)',
+          backdropFilter: 'blur(30px)',
           borderRadius: '64px',
           zIndex: 0,
           display: 'flex',
@@ -42,17 +42,17 @@ const UnifiedMatrixFlow: React.FC = () => {
           justifyContent: 'flex-start',
           padding: '40px'
         }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--accent)', letterSpacing: '0.5em', opacity: 0.6, fontWeight: 'bold' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--accent2)', letterSpacing: '0.5em', opacity: 0.6, fontWeight: 'bold' }}>
             HW RESIDENCY BOUNDARY (SYSTEM CACHE)
           </div>
         </div>
 
-        {/* MATRIX STACK - Reduced gap for solid containment */}
+        {/* MATRIX STACK - High Contrast Transformation */}
         <div className="matrix-stack" style={{ 
           display: 'flex', 
-          gap: '90px', 
+          gap: '100px', 
           zIndex: 1, 
-          transform: 'rotateX(10deg) rotateY(-3deg)', 
+          transform: 'rotateX(8deg) rotateY(-2deg)', 
           transformStyle: 'preserve-3d',
           paddingBottom: '40px'
         }}>
@@ -67,9 +67,8 @@ const UnifiedMatrixFlow: React.FC = () => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                opacity: isActive ? 1 : 0.08,
-                // Reduced Z-scale and translation to stay inside
-                transform: isActive ? 'translateZ(60px) scale(1.1)' : 'translateZ(0) scale(1)',
+                opacity: isActive ? 1 : 0.04, // Deep contrast for inactive states
+                transform: isActive ? 'translateZ(80px) scale(1.15)' : 'translateZ(0) scale(1)',
                 position: 'relative'
               }}>
                 {/* LABEL ABOVE */}
@@ -79,47 +78,47 @@ const UnifiedMatrixFlow: React.FC = () => {
                   width: '140px', 
                   textAlign: 'center',
                   transition: 'all 0.4s',
-                  transform: isActive ? 'translateY(-10px)' : 'none',
-                  color: isActive ? p.color : 'var(--text3)'
+                  transform: isActive ? 'translateY(-15px)' : 'none',
+                  color: isActive ? 'var(--accent)' : 'var(--text3)'
                 }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{p.title}</div>
-                  <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '5px' }}>{p.subtitle}</div>
+                  <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '5px' }}>{p.subtitle}</div>
                 </div>
 
-                {/* THE MATRIX - Optimized size */}
+                {/* THE MATRIX - Optimized size with vibrant red active state */}
                 <div style={{ 
                   display: 'grid', 
                   gridTemplateColumns: `repeat(${size}, 22px)`, 
                   gap: '4px',
-                  background: 'rgba(255, 255, 255, 0.03)',
+                  background: 'rgba(255, 255, 255, 0.02)',
                   padding: '10px',
                   borderRadius: '10px',
-                  border: `2px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
-                  boxShadow: isActive ? `0 0 50px ${p.color}22` : 'none',
+                  border: `2px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`,
+                  boxShadow: isActive ? `0 0 60px rgba(255, 0, 0, 0.2)` : 'none',
                   position: 'relative'
                 }}>
                   {Array.from({ length: size * size }).map((_, j) => (
                     <div key={j} style={{ 
                       width: '22px', 
                       height: '22px', 
-                      background: isActive ? p.color : 'var(--bg3)',
-                      opacity: isActive ? (0.4 + Math.random() * 0.6) : 0.05,
+                      background: isActive ? 'var(--accent)' : 'var(--bg3)',
+                      opacity: isActive ? (0.7 + Math.random() * 0.3) : 0.03,
                       borderRadius: '3px'
                     }}></div>
                   ))}
                 </div>
 
-                {/* FLOW ARROW - Subtle positioning */}
+                {/* FLOW ARROW - Subtle red highlight */}
                 {i < phases.length - 1 && (
                   <div style={{ 
                     position: 'absolute', 
-                    right: '-60px', 
+                    right: '-70px', 
                     top: '12px', 
                     fontSize: '24px', 
-                    color: isActive ? phases[i+1].color : 'var(--accent)',
+                    color: isActive ? 'var(--accent)' : 'var(--text3)',
                     animation: isActive ? 'pulse-arrow 1s infinite' : 'none',
                     fontWeight: '300',
-                    opacity: 0.3
+                    opacity: isActive ? 0.8 : 0.1
                   }}>
                     →
                   </div>

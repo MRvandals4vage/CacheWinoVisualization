@@ -23,8 +23,8 @@ const LoopOrderVis: React.FC = () => {
                 key={i} 
                 style={{ 
                   width: '28px', height: '28px', borderRadius: '4px', 
-                  background: `rgba(110,231,183,${0.1 + i * 0.05})`, 
-                  border: '1px solid rgba(110,231,183,0.3)', 
+                  background: `rgba(212,212,212,${0.1 + i * 0.05})`, 
+                  border: '1px solid var(--accent3)', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', 
                   fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent)' 
                 }}

@@ -23,18 +23,18 @@ const PipelineStage: React.FC<StageData> = ({ label, sub, color, dram }) => (
 
 const ComparisonPipelines: React.FC = () => {
   const naiveStages: StageData[] = [
-    { label: 'Input transform', sub: 'B⊤XB', color: 'var(--accent5)' },
-    { label: 'Intermediate tensor', sub: 'Write to DRAM →', color: 'var(--accent4)', dram: true },
+    { label: 'Input transform', sub: 'B⊤XB', color: 'var(--accent2)' },
+    { label: 'Intermediate tensor', sub: 'Write to DRAM →', color: 'var(--accent)', dram: true },
     { label: 'Weight transform', sub: 'GWG⊤', color: 'var(--accent3)' },
-    { label: 'Intermediate tensor', sub: 'Write to DRAM →', color: 'var(--accent4)', dram: true },
+    { label: 'Intermediate tensor', sub: 'Write to DRAM →', color: 'var(--accent)', dram: true },
     { label: 'Element-wise multiply', sub: 'X̂ ⊙ Ŵ', color: 'var(--accent2)' },
-    { label: 'Intermediate tensor', sub: 'Write to DRAM →', color: 'var(--accent4)', dram: true },
-    { label: 'Inverse transform', sub: 'A⊤(·)A', color: 'var(--accent)' },
+    { label: 'Intermediate tensor', sub: 'Write to DRAM →', color: 'var(--accent)', dram: true },
+    { label: 'Inverse transform', sub: 'A⊤(·)A', color: 'var(--accent2)' },
   ];
 
   const fusedStages: StageData[] = [
     { label: 'Input transform', sub: 'B⊤XB → L2 resident', color: 'var(--accent5)' },
-    { label: 'Weight transform', sub: 'GWG⊤ (precomputed)', color: 'var(--accent3)' },
+    { label: 'Weight transform', sub: 'GWG⊤ (precomputed)', color: 'var(--accent2)' },
     { label: 'Fused: multiply + inverse', sub: 'All output channels → Y', color: 'var(--accent)' },
   ];
 
@@ -52,13 +52,13 @@ const ComparisonPipelines: React.FC = () => {
   );
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '32px' }}>
       <div>
-        <div className="badge badge-red" style={{ marginBottom: '12px' }}>Naive pipeline</div>
+        <div className="badge badge-red" style={{ marginBottom: '16px', fontWeight: 'bold' }}>NAIVE (DRAM-BOUND)</div>
         <div>{renderPipe(naiveStages)}</div>
       </div>
       <div>
-        <div className="badge badge-green" style={{ marginBottom: '12px' }}>Fused pipeline</div>
+        <div className="badge badge-blue" style={{ marginBottom: '16px', fontWeight: 'bold', border: '1px solid var(--accent)' }}>FUSED (CACHE-RESIDENT)</div>
         <div>{renderPipe(fusedStages)}</div>
       </div>
     </div>
