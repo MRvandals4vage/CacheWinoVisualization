@@ -19,40 +19,41 @@ const UnifiedMatrixFlow: React.FC = () => {
   }, [phases.length]);
 
   return (
-    <div className="canvas-wrap" style={{ minHeight: '800px', display: 'flex', flexDirection: 'column', perspective: '1500px', padding: '40px' }}>
-      <div className="conv-vis-title" style={{ marginBottom: '40px', fontSize: '20px' }}>
+    <div className="canvas-wrap" style={{ minHeight: '750px', display: 'flex', flexDirection: 'column', perspective: '1200px', padding: '40px', overflow: 'hidden' }}>
+      <div className="conv-vis-title" style={{ marginBottom: '40px', fontSize: '18px', textAlign: 'center' }}>
         Layer-by-Layer Data Transformation & Optimization
       </div>
 
-      <div className="flow-container" style={{ flex: 1, display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'center', padding: '60px 0', margin: '20px 0' }}>
+      <div className="flow-container" style={{ flex: 1, display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'center', padding: '100px 20px' }}>
         
-        {/* THE "CACHE RESIDENT" ZONE - Much bigger now */}
+        {/* THE "CACHE RESIDENT" ZONE - The boundary box */}
         <div className="cache-residency-zone" style={{ 
           position: 'absolute', 
-          width: '95%', 
-          height: '450px', 
-          border: '1px solid rgba(110, 231, 183, 0.12)', 
-          background: 'rgba(10, 10, 15, 0.5)',
-          backdropFilter: 'blur(8px)',
+          width: '98%', 
+          height: '420px', 
+          border: '1px solid rgba(110, 231, 183, 0.15)', 
+          background: 'rgba(10, 10, 15, 0.65)',
+          backdropFilter: 'blur(10px)',
           borderRadius: '32px',
           zIndex: 0,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'flex-start',
-          padding: '24px'
+          padding: '20px'
         }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', letterSpacing: '0.3em', opacity: 0.5, fontWeight: 'bold' }}>
-            ON-CHIP CACHE RESIDENCY BOUNDARY
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', letterSpacing: '0.4em', opacity: 0.5, fontWeight: 'bold' }}>
+            HW RESIDENCY BOUNDARY (SYSTEM CACHE)
           </div>
         </div>
 
-        {/* MATRIX STACK - Massive gap to prevent overlap */}
+        {/* MATRIX STACK - Squeezed gap to ensure containment */}
         <div className="matrix-stack" style={{ 
           display: 'flex', 
-          gap: '180px', 
+          gap: '80px', 
           zIndex: 1, 
-          transform: 'rotateX(15deg) rotateY(-5deg)', 
+          // Flatter rotation for better alignment
+          transform: 'rotateX(10deg) rotateY(-2deg)', 
           transformStyle: 'preserve-3d',
           paddingBottom: '20px'
         }}>
@@ -67,58 +68,59 @@ const UnifiedMatrixFlow: React.FC = () => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                opacity: isActive ? 1 : 0.2,
-                transform: isActive ? 'translateZ(80px) scale(1.15)' : 'translateZ(0) scale(1)',
+                opacity: isActive ? 1 : 0.1,
+                // Reduced Z-translation to prevent protrusion
+                transform: isActive ? 'translateZ(60px) scale(1.1)' : 'translateZ(0) scale(1)',
                 position: 'relative'
               }}>
-                {/* LABEL ABOVE - Higher up to avoid matrix */}
+                {/* LABEL ABOVE - Closer to matrix */}
                 <div style={{ 
                   position: 'absolute', 
-                  top: '-100px', 
-                  width: '160px', 
+                  top: '-85px', 
+                  width: '140px', 
                   textAlign: 'center',
                   transition: 'all 0.4s',
-                  transform: isActive ? 'translateY(-10px)' : 'none',
+                  transform: isActive ? 'translateY(-5px)' : 'none',
                   color: isActive ? p.color : 'var(--text3)'
                 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{p.title}</div>
-                  <div style={{ fontSize: '10px', opacity: 0.7, marginTop: '4px', fontStyle: 'italic' }}>{p.subtitle}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{p.title}</div>
+                  <div style={{ fontSize: '9px', opacity: 0.7, marginTop: '4px' }}>{p.subtitle}</div>
                 </div>
 
-                {/* THE MATRIX */}
+                {/* THE MATRIX - Smaller cells */}
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: `repeat(${size}, 22px)`, 
-                  gap: '4px',
-                  background: 'var(--bg3)',
+                  gridTemplateColumns: `repeat(${size}, 20px)`, 
+                  gap: '3px',
+                  background: 'rgba(255, 255, 255, 0.03)',
                   padding: '10px',
-                  borderRadius: '10px',
-                  border: `2px solid ${isActive ? p.color : 'var(--border)'}`,
-                  boxShadow: isActive ? `0 0 50px ${p.color}33` : 'none',
+                  borderRadius: '8px',
+                  border: `1px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
+                  boxShadow: isActive ? `0 0 40px ${p.color}22` : 'none',
                   position: 'relative'
                 }}>
                   {Array.from({ length: size * size }).map((_, j) => (
                     <div key={j} style={{ 
-                      width: '22px', 
-                      height: '22px', 
-                      background: isActive ? p.color : 'var(--surface2)',
-                      opacity: isActive ? (0.4 + Math.random() * 0.6) : 0.1,
+                      width: '20px', 
+                      height: '20px', 
+                      background: isActive ? p.color : 'var(--bg3)',
+                      opacity: isActive ? (0.4 + Math.random() * 0.6) : 0.05,
                       borderRadius: '3px'
                     }}></div>
                   ))}
                 </div>
 
-                {/* FLOW ARROW - Centered between gaps */}
+                {/* FLOW ARROW - Shorter arrow */}
                 {i < phases.length - 1 && (
                   <div style={{ 
                     position: 'absolute', 
-                    right: '-110px', 
-                    top: '15px', 
-                    fontSize: '24px', 
-                    color: isActive ? phases[i+1].color : 'var(--border2)',
+                    right: '-50px', 
+                    top: '12px', 
+                    fontSize: '22px', 
+                    color: isActive ? phases[i+1].color : 'var(--accent)',
                     animation: isActive ? 'pulse-arrow 1s infinite' : 'none',
-                    fontWeight: 'bold',
-                    opacity: 0.5
+                    fontWeight: '300',
+                    opacity: 0.3
                   }}>
                     →
                   </div>
@@ -128,17 +130,22 @@ const UnifiedMatrixFlow: React.FC = () => {
           })}
         </div>
 
-        {/* OPTIMIZATION OVERLAYS - Moved even further down */}
+        {/* OPTIMIZATION OVERLAYS - Clearly inside the box and higher up */}
         <div className="opt-overlay" style={{ 
           position: 'absolute', 
-          bottom: '-30px', 
+          bottom: '50px', 
           display: 'flex', 
-          gap: '24px', 
+          gap: '20px', 
           zIndex: 2,
+          padding: '8px 24px',
+          background: 'rgba(0,0,0,0.5)',
+          borderRadius: '40px',
+          border: '1px solid var(--border)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
         }}>
-          <div className="badge badge-blue" style={{ padding: '10px 20px', fontSize: '12px', opacity: step >= 0 ? 1 : 0.2, transition: 'all .5s', transform: step >= 0 ? 'scale(1.05)' : 'scale(1)' }}>1. CACHE PROBED</div>
-          <div className="badge badge-amber" style={{ padding: '10px 20px', fontSize: '12px', opacity: step >= 1 ? 1 : 0.2, transition: 'all .5s', transform: step >= 1 ? 'scale(1.05)' : 'scale(1)' }}>2. TILE SELECTED</div>
-          <div className="badge badge-green" style={{ padding: '10px 20px', fontSize: '12px', opacity: step >= 3 ? 1 : 0.2, transition: 'all .5s', transform: step >= 3 ? 'scale(1.05)' : 'scale(1)' }}>3. FULLY FUSED</div>
+          <div className="badge badge-blue" style={{ fontSize: '11px', padding: '6px 14px', opacity: step >= 0 ? 1 : 0.15, transition: 'all .5s' }}>1. PROBED</div>
+          <div className="badge badge-amber" style={{ fontSize: '11px', padding: '6px 14px', opacity: step >= 1 ? 1 : 0.15, transition: 'all .5s' }}>2. TILED</div>
+          <div className="badge badge-green" style={{ fontSize: '11px', padding: '6px 14px', opacity: step >= 3 ? 1 : 0.15, transition: 'all .5s' }}>3. FUSED</div>
         </div>
 
       </div>
