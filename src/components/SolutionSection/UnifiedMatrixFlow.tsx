@@ -57,8 +57,8 @@ const UnifiedMatrixFlow: React.FC = () => {
         
         <div className="cache-residency-zone" style={{ 
           position: 'absolute', 
-          width: '100%', 
-          height: isMobile ? '520px' : '660px', 
+          width: 'calc(100% - 10px)', 
+          height: isMobile ? '580px' : '660px', 
           border: '1px solid var(--border2)', 
           background: 'rgba(5, 5, 10, 0.9)',
           backdropFilter: 'blur(30px)',
@@ -67,10 +67,10 @@ const UnifiedMatrixFlow: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'flex-start',
-          padding: '24px'
+          justifyContent: isMobile ? 'center' : 'flex-start',
+          padding: isMobile ? '0' : '24px'
         }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '10px' : '13px', color: 'var(--accent2)', letterSpacing: '0.4em', opacity: 0.6, fontWeight: 'bold' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '10px' : '13px', color: 'var(--accent2)', letterSpacing: '0.4em', opacity: 0.6, fontWeight: 'bold', marginBottom: isMobile ? '15px' : '0' }}>
             HW RESIDENCY BOUNDARY
           </div>
         </div>
@@ -78,11 +78,10 @@ const UnifiedMatrixFlow: React.FC = () => {
         <div className="matrix-stack" style={{ 
           display: 'flex', 
           flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '28px' : '100px', 
+          gap: isMobile ? '22px' : '100px', 
           zIndex: 1, 
           transform: isMobile ? 'none' : 'rotateX(8deg) rotateY(-2deg)', 
-          transformStyle: 'preserve-3d',
-          paddingBottom: isMobile ? '0' : '40px'
+          transformStyle: 'preserve-3d'
         }}>
           
           {phases.map((p, i) => {
@@ -95,13 +94,13 @@ const UnifiedMatrixFlow: React.FC = () => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                opacity: isActive ? 1 : (isMobile ? 0.2 : 0.04), 
-                transform: isActive ? 'translateZ(40px) scale(1.05)' : 'translateZ(0) scale(0.9)',
+                opacity: isActive ? 1 : (isMobile ? 0.25 : 0.04), 
+                transform: isActive ? (isMobile ? 'none' : 'translateZ(40px) scale(1.05)') : 'none',
                 position: 'relative'
               }}>
                 <div style={{ 
                   position: 'absolute', 
-                  top: isMobile ? '-18px' : '-100px',
+                  top: isMobile ? '-14px' : '-100px',
                   left: '50%',
                   transform: 'translateX(-50%)',
                   width: isMobile ? '160px' : '140px', 
@@ -109,15 +108,15 @@ const UnifiedMatrixFlow: React.FC = () => {
                   transition: 'all 0.4s',
                   color: isActive ? 'var(--accent)' : 'var(--text3)'
                 }}>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '9px' : '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>{p.title}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? '8px' : '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>{p.title}</div>
                 </div>
 
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: `repeat(${size}, 20px)`, 
+                  gridTemplateColumns: `repeat(${size}, ${isMobile ? '16px' : '20px'})`, 
                   gap: '3px',
                   background: '#000',
-                  padding: '8px',
+                  padding: isMobile ? '6px' : '8px',
                   borderRadius: '10px',
                   border: `1.5px solid ${isActive ? p.color : 'rgba(255,255,255,0.05)'}`,
                   boxShadow: isActive ? `0 0 50px ${p.color}33` : 'none',
@@ -126,8 +125,8 @@ const UnifiedMatrixFlow: React.FC = () => {
                 }}>
                   {Array.from({ length: size * size }).map((_, j) => (
                     <div key={j} style={{ 
-                      width: '20px', 
-                      height: '20px', 
+                      width: isMobile ? '16px' : '20px', 
+                      height: isMobile ? '16px' : '20px', 
                       background: isActive ? p.color : '#080808',
                       opacity: isActive ? (0.6 + (Math.sin(j + step * 2) * 0.4)) : 0.05,
                       borderRadius: '2px',
@@ -140,9 +139,9 @@ const UnifiedMatrixFlow: React.FC = () => {
                   <div style={{ 
                     position: 'absolute', 
                     right: isMobile ? 'auto' : '-70px',
-                    bottom: isMobile ? '-28px' : 'auto', 
+                    bottom: isMobile ? '-24px' : 'auto', 
                     top: isMobile ? 'auto' : '15px', 
-                    fontSize: '20px', 
+                    fontSize: '18px', 
                     color: isActive ? (phases[i+1]?.color || 'var(--accent)') : 'var(--text3)',
                     transform: isMobile ? 'rotate(90deg)' : 'none',
                     animation: isActive && !isMobile ? 'pulse-arrow 1s infinite' : 'none',
