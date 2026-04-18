@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CacheWinograd — A Visual Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #0f0f18;
+  --bg3: #14141f;
+  --surface: #1a1a28;
+  --surface2: #22223a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e8f0;
+  --text2: #9090b0;
+  --text3: #5a5a7a;
+  --accent: #6ee7b7;
+  --accent2: #818cf8;
+  --accent3: #f59e0b;
+  --accent4: #f87171;
+  --accent5: #38bdf8;
+  --glow: rgba(110,231,183,0.15);
+  --glow2: rgba(129,140,248,0.15);
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Instrument Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
+
+/* ─── GRAIN OVERLAY ─── */
+body::before {
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:.4;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  padding: 16px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.nav-links {
+  display: flex; gap: 32px; list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  color: var(--text2);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--accent);
+}
+
+/* ─── HERO ─── */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(110,231,183,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(129,140,248,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 60%, rgba(56,189,248,0.04) 0%, transparent 60%);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+}
+.hero-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-label::before, .hero-label::after {
+  content: ''; display: block; height: 1px; width: 40px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+.hero-label::after { transform: scaleX(-1); }
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 8vw, 96px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+.hero-subtitle {
+  font-size: 18px;
+  color: var(--text2);
+  max-width: 560px;
+  margin: 24px auto 48px;
+  line-height: 1.6;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 40px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .25s;
+}
+.hero-cta:hover {
+  background: var(--surface2);
+  border-color: rgba(110,231,183,0.3);
+  transform: translateY(-2px);
+}
+.hero-cta .arrow { transition: transform .25s; }
+.hero-cta:hover .arrow { transform: translateY(4px); }
+.hero-scroll-hint {
+  position: absolute; bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--text3);
+  letter-spacing: 0.1em;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* ─── SECTIONS ─── */
+.section {
+  padding: 120px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+.section-full {
+  padding: 120px 0;
+  position: relative;
+}
+.section-full .inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+.section-lead {
+  font-size: 18px;
+  color: var(--text2);
+  max-width: 640px;
+  line-height: 1.7;
+  margin-bottom: 64px;
+}
+
+/* ─── DIVIDER ─── */
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+  margin: 0;
+}
+
+/* ─── WINOGRAD CONCEPT VIS ─── */
+.concept-grid {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  gap: 0;
+  align-items: center;
+  margin-bottom: 64px;
+}
+.concept-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+}
+.concept-panel-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-direct { background: var(--accent4); }
+.dot-winograd { background: var(--accent); }
+.concept-arrow {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text3);
+  font-size: 24px;
+}
+
+/* ─── MATRIX VIS ─── */
+.matrix-container {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0;
+}
+.matrix-cell {
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  transition: all .3s;
+  cursor: default;
+  position: relative;
+}
+.cell-active { background: rgba(110,231,183,0.2); color: var(--accent); border: 1px solid rgba(110,231,183,0.3); }
+.cell-input { background: rgba(56,189,248,0.15); color: var(--accent5); border: 1px solid rgba(56,189,248,0.2); }
+.cell-transform { background: rgba(129,140,248,0.15); color: var(--accent2); border: 1px solid rgba(129,140,248,0.2); }
+.cell-output { background: rgba(110,231,183,0.2); color: var(--accent); border: 1px solid rgba(110,231,183,0.3); }
+.cell-weight { background: rgba(245,158,11,0.15); color: var(--accent3); border: 1px solid rgba(245,158,11,0.2); }
+.cell-empty { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+.cell-highlight { background: rgba(248,113,113,0.2); color: var(--accent4); border: 1px solid rgba(248,113,113,0.3); }
+
+/* ─── STEP STEPPER ─── */
+.stepper {
+  display: flex; gap: 0; margin-bottom: 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.step-btn {
+  flex: 1; padding: 14px 16px;
+  background: var(--surface);
+  border: none; border-right: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: 0.05em;
+}
+.step-btn:last-child { border-right: none; }
+.step-btn.active {
+  background: var(--surface2);
+  color: var(--text);
+  position: relative;
+}
+.step-btn.active::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.step-btn:hover:not(.active) { background: var(--bg3); }
+
+/* ─── STEP CONTENT ─── */
+.step-content { display: none; }
+.step-content.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─── FORMULA BOX ─── */
+.formula-box {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 24px 28px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text);
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+.formula-box::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent2), var(--accent));
+}
+.formula-highlight { color: var(--accent); font-weight: 500; }
+.formula-dim { color: var(--text3); }
+
+/* ─── COMPARISON TABLE ─── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 32px 0;
+}
+.compare-table th {
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: var(--surface); }
+.check { color: var(--accent); font-size: 16px; }
+.cross { color: var(--accent4); font-size: 16px; }
+.partial { color: var(--accent3); font-size: 16px; }
+.highlight-row td { background: rgba(110,231,183,0.05) !important; }
+.highlight-row td:first-child { border-left: 2px solid var(--accent); padding-left: 14px; }
+
+/* ─── INTERACTIVE CONV VIS ─── */
+.conv-vis {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 32px 0;
+}
+.conv-vis-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.conv-layout {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.conv-grid {
+  display: grid;
+  gap: 3px;
+}
+.conv-grid.g5 { grid-template-columns: repeat(5,36px); }
+.conv-grid.g3 { grid-template-columns: repeat(3,36px); }
+.conv-grid.g4 { grid-template-columns: repeat(4,36px); }
+.conv-grid.g6 { grid-template-columns: repeat(6,36px); }
+.conv-op { font-size: 28px; color: var(--text3); font-weight: 300; }
+.conv-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ─── PROBLEM SECTION ─── */
+.problem-cards {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 48px 0;
+}
+.problem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .3s;
+}
+.problem-card:hover { border-color: var(--border2); }
+.problem-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent4), transparent);
+}
+.problem-card-icon {
+  font-size: 28px; margin-bottom: 16px;
+}
+.problem-card h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.problem-card p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* ─── MEMORY AMPLIFICATION VIS ─── */
+.amp-vis {
+  display: flex; align-items: flex-end; gap: 24px;
+  height: 200px;
+  margin: 40px 0;
+  padding: 0 8px;
+}
+.amp-bar-group {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  flex: 1;
+}
+.amp-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  transition: all .6s cubic-bezier(0.34,1.56,0.64,1);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 8px;
+}
+.amp-bar-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+.amp-bar-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text3);
+  text-align: center;
+}
+
+/* ─── SOLUTION SECTION ─── */
+.solution-flow {
+  display: flex; flex-direction: column; gap: 0;
+  margin: 48px 0;
+}
+.sol-phase {
+  display: grid; grid-template-columns: 48px 1fr;
+  gap: 0 24px;
+  position: relative;
+}
+.sol-phase-line {
+  display: flex; flex-direction: column; align-items: center;
+}
+.sol-num {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px; font-weight: 500;
+  position: relative; z-index: 2;
+  flex-shrink: 0;
+}
+.sol-num-1 { background: rgba(56,189,248,0.2); color: var(--accent5); border: 1px solid rgba(56,189,248,0.3); }
+.sol-num-2 { background: rgba(245,158,11,0.2); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3); }
+.sol-num-3 { background: rgba(110,231,183,0.2); color: var(--accent); border: 1px solid rgba(110,231,183,0.3); }
+.sol-vline {
+  flex: 1; width: 1px;
+  background: linear-gradient(180deg, var(--border2), transparent);
+  margin: 4px 0;
+  min-height: 40px;
+}
+.sol-content {
+  padding-bottom: 48px;
+}
+.sol-content h3 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  margin-bottom: 12px;
+  padding-top: 6px;
+}
+.sol-content p { font-size: 15px; color: var(--text2); max-width: 600px; }
+
+/* ─── TILE SELECTOR VIS ─── */
+.tile-race {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+}
+.tile-row-vis {
+  display: flex; align-items: center; gap: 12px; margin: 12px 0;
+}
+.tile-label-vis {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text2);
+  width: 40px;
+}
+.tile-bar-track {
+  flex: 1; height: 32px;
+  background: var(--surface);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.tile-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex; align-items: center; padding-left: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  transition: width .8s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+}
+.tile-bar-fill.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tile-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* ─── PIPELINE VIS ─── */
+.pipeline {
+  display: flex; gap: 0; margin: 40px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.pipe-stage {
+  flex: 1; padding: 28px 20px;
+  border-right: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background .2s;
+}
+.pipe-stage:last-child { border-right: none; }
+.pipe-stage:hover { background: var(--surface2); }
+.pipe-stage.active-stage { background: var(--surface2); }
+.pipe-stage.active-stage::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+.stage1::after { background: var(--accent5); }
+.stage2::after { background: var(--accent3); }
+.stage3::after { background: var(--accent); }
+.pipe-num {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--text3); margin-bottom: 10px;
+  letter-spacing: 0.1em;
+}
+.pipe-title {
+  font-size: 14px; font-weight: 600; margin-bottom: 6px;
+  color: var(--text);
+}
+.pipe-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* ─── RESULT CARDS ─── */
+.result-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+  margin: 48px 0;
+}
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s, border-color .2s;
+}
+.result-card:hover { transform: translateY(-3px); border-color: var(--border2); }
+.result-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--glow);
+  opacity: 0; transition: opacity .3s;
+}
+.result-card:hover::before { opacity: 1; }
+.result-val {
+  font-family: var(--font-display);
+  font-size: 42px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.result-unit { font-size: 20px; }
+.result-label { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+/* ─── INTERACTIVE STEP VIS ─── */
+.vis-controls {
+  display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.vis-btn {
+  padding: 8px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.vis-btn:hover { background: var(--surface2); color: var(--text); }
+.vis-btn.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+
+/* ─── TOOLTIP ─── */
+.tooltip-box {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+/* ─── SECTION DIVIDER WITH LABEL ─── */
+.labeled-divider {
+  display: flex; align-items: center; gap: 16px;
+  margin: 80px 0 0;
+}
+.labeled-divider-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2));
+}
+.labeled-divider-line.reverse {
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+.labeled-divider-text {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--text3); letter-spacing: 0.12em;
+  text-transform: uppercase; white-space: nowrap;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  padding: 48px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+footer a { color: var(--text2); text-decoration: none; }
+footer a:hover { color: var(--accent); }
+
+/* ─── ANIMATED ENTRY ─── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ─── BADGE ─── */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.badge-green { background: rgba(110,231,183,0.1); color: var(--accent); border: 1px solid rgba(110,231,183,0.2); }
+.badge-red { background: rgba(248,113,113,0.1); color: var(--accent4); border: 1px solid rgba(248,113,113,0.2); }
+.badge-blue { background: rgba(56,189,248,0.1); color: var(--accent5); border: 1px solid rgba(56,189,248,0.2); }
+.badge-amber { background: rgba(245,158,11,0.1); color: var(--accent3); border: 1px solid rgba(245,158,11,0.2); }
+
+/* ─── CANVAS WRAPPER ─── */
+.canvas-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 32px 0;
+  overflow-x: auto;
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .section { padding: 80px 24px; }
+  .concept-grid { grid-template-columns: 1fr; gap: 24px; }
+  .problem-cards { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: repeat(2,1fr); }
+  .pipeline { flex-direction: column; }
+  .pipe-stage { border-right: none; border-bottom: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">cache<span style="color:var(--text2)">winograd</span></div>
+  <ul class="nav-links">
+    <li><a href="#winograd">Winograd</a></li>
+    <li><a href="#problem">The Problem</a></li>
+    <li><a href="#solution">Our Solution</a></li>
+    <li><a href="#results">Results</a></li>
+  </ul>
+  <div class="nav-pill">Research Explainer</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div style="position:relative;z-index:2">
+    <div class="hero-label">Visual Deep Dive</div>
+    <h1 class="hero-title">Cache<em>Winograd</em></h1>
+    <p class="hero-subtitle">
+      Why arithmetic efficiency alone fails on edge CPUs — and how runtime-adaptive cache scheduling closes the gap.
+    </p>
+    <a href="#winograd" class="hero-cta">
+      Start exploring
+      <span class="arrow">↓</span>
+    </a>
+  </div>
+  <div class="hero-scroll-hint">scroll to explore</div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ SECTION 1: WINOGRAD ═══ -->
+<section id="winograd" class="section">
+  <div class="section-number reveal">01 — The Algorithm</div>
+  <h2 class="section-title reveal">What is Winograd convolution?</h2>
+  <p class="section-lead reveal">
+    Standard convolution is arithmetic-heavy. Winograd's insight: factor the computation to reuse intermediate products, slashing multiply-accumulate operations by up to 2.25×.
+  </p>
+
+  <!-- Standard Conv Explainer -->
+  <div class="stepper reveal" id="winogradStepper">
+    <button class="step-btn active" onclick="setStep('w',0)">Direct Conv</button>
+    <button class="step-btn" onclick="setStep('w',1)">The Transform</button>
+    <button class="step-btn" onclick="setStep('w',2)">Pointwise Multiply</button>
+    <button class="step-btn" onclick="setStep('w',3)">Inverse Transform</button>
+  </div>
+
+  <!-- Step 0: Direct Conv -->
+  <div class="step-content active reveal" id="w-step-0">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">Direct convolution — sliding a 3×3 kernel over a 5×5 input</div>
+      <div class="conv-layout" id="directConvLayout">
+        <!-- rendered by JS -->
+      </div>
+      <div class="tooltip-box">
+        For every output pixel, the kernel slides across the input performing <span style="color:var(--accent)">9 multiplications + 8 additions = 17 MACs</span>. 
+        For a 3×3 kernel producing a 3×3 output tile: <strong style="color:var(--accent4)">9 × 9 = 81 multiply-accumulate operations.</strong>
+      </div>
+    </div>
+    <div class="formula-box">
+      <span class="formula-dim">Direct MACs = </span><span class="formula-highlight">Cin × Cout × H' × W' × K²</span>
+      <br><span class="formula-dim">For K=3: each output element costs </span><span class="formula-highlight">9 MACs</span>
+    </div>
+  </div>
+
+  <!-- Step 1: The Transform -->
+  <div class="step-content reveal" id="w-step-1">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">Winograd F(2,3) — transform input and weights into a new domain</div>
+      <div class="conv-layout" style="flex-wrap:wrap;gap:40px">
+        <div>
+          <div id="inputTileGrid"></div>
+          <div class="conv-label">Input tile X (4×4)</div>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:20px;color:var(--accent2)">B<sup style="font-size:12px">⊤</sup></div>
+            <div class="conv-label">Transform</div>
+          </div>
+          <div style="font-size:24px;color:var(--text3);margin:0 12px">→</div>
+        </div>
+        <div>
+          <div id="transformedGrid"></div>
+          <div class="conv-label">X̂ = B<sup>⊤</sup>XB (4×4)</div>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:20px;color:var(--accent3)">G</div>
+            <div class="conv-label">Weight<br>transform</div>
+          </div>
+          <div style="font-size:24px;color:var(--text3);margin:0 12px">→</div>
+        </div>
+        <div>
+          <div id="weightGrid"></div>
+          <div class="conv-label">Ŵ = GWG<sup>⊤</sup> (4×4)</div>
+        </div>
+      </div>
+      <div class="tooltip-box">
+        The transforms B, G, A are <span style="color:var(--accent2)">fixed matrices</span> — computed once and reused. The F(2,3) scheme maps a 4×4 input tile and 3×3 kernel into the Winograd domain with only additions (no multiplications in the transform itself).
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Pointwise Multiply -->
+  <div class="step-content reveal" id="w-step-2">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">The magic — element-wise multiply replaces convolution</div>
+      <div class="conv-layout" style="flex-wrap:wrap;gap:20px;align-items:flex-start;margin-top:16px">
+        <div>
+          <div id="xhatGrid"></div>
+          <div class="conv-label">X̂ (transformed input)</div>
+        </div>
+        <div class="conv-op" style="align-self:center">⊙</div>
+        <div>
+          <div id="whatGrid"></div>
+          <div class="conv-label">Ŵ (transformed weight)</div>
+        </div>
+        <div class="conv-op" style="align-self:center">=</div>
+        <div>
+          <div id="elemwiseGrid"></div>
+          <div class="conv-label">Element-wise product</div>
+        </div>
+      </div>
+      <div class="tooltip-box">
+        In the Winograd domain, convolution becomes <span style="color:var(--accent)">element-wise multiplication</span>. For F(2,3), this is only <span style="color:var(--accent)">16 multiplications</span> vs 36 in direct conv — a <strong style="color:var(--accent)">2.25× reduction</strong> in the most expensive operation.
+      </div>
+    </div>
+    <div class="formula-box">
+      <span class="formula-dim">Arithmetic reduction </span><span class="formula-highlight">ρ(m) = m² × K² / (m + K - 1)²</span>
+      <br><span class="formula-dim">F(2,3): ρ = </span><span class="formula-highlight">4 × 9 / 16 = 2.25×</span>
+      <span class="formula-dim"> fewer multiplications</span>
+    </div>
+  </div>
+
+  <!-- Step 3: Inverse -->
+  <div class="step-content reveal" id="w-step-3">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">Inverse transform — map back to the output domain</div>
+      <div class="conv-layout" style="flex-wrap:wrap;gap:40px">
+        <div>
+          <div id="prodGrid"></div>
+          <div class="conv-label">Element-wise product</div>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:20px;color:var(--accent)">A<sup style="font-size:12px">⊤</sup></div>
+            <div class="conv-label">Inverse</div>
+          </div>
+          <div style="font-size:24px;color:var(--text3);margin:0 12px">→</div>
+        </div>
+        <div>
+          <div id="outputGrid"></div>
+          <div class="conv-label">Output tile Y (2×2)</div>
+        </div>
+      </div>
+      <div class="tooltip-box">
+        A<sup>⊤</sup>(X̂ ⊙ Ŵ)A maps back to the <span style="color:var(--accent)">2×2 output tile</span>. 
+        Total cost: transforms use only additions; <span style="color:var(--accent)">only 16 multiplications</span> for 4 output values vs 36 for direct conv.
+        <br><br>
+        <strong style="color:var(--text)">Full pipeline:</strong> 
+        <span style="color:var(--accent5)">B⊤XB</span> → <span style="color:var(--accent3)">GWG⊤</span> → <span style="color:var(--accent2)">⊙</span> → <span style="color:var(--accent)">A⊤(·)A</span>
+      </div>
+    </div>
+    <div class="formula-box">
+      <span class="formula-dim">Full equation: </span><span class="formula-highlight">Y = A⊤(B⊤XB ⊙ GWG⊤)A</span>
+      <br><span class="formula-dim">Produces a </span><span class="formula-highlight">2×2 output tile</span><span class="formula-dim"> from a 4×4 input tile with 3×3 kernel</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ SECTION 2: THE PROBLEM ═══ -->
+<section id="problem" class="section">
+  <div class="section-number reveal">02 — The Problem</div>
+  <h2 class="section-title reveal">So why doesn't it work<br><em style="font-style:italic;color:var(--accent4)">in practice?</em></h2>
+  <p class="section-lead reveal">
+    The arithmetic wins are real. But edge CPUs are <em>not</em> compute-bound — they're memory-bound. And Winograd quietly makes the memory problem worse.
+  </p>
+
+  <div class="problem-cards reveal">
+    <div class="problem-card">
+      <div class="problem-card-icon">📦</div>
+      <h3>Data inflation</h3>
+      <p>Every input tile expands from m² to (m+2)² elements. For F(2,3), that's a <strong style="color:var(--accent4)">4× intermediate blowup</strong> in working-set size.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-card-icon">🗃️</div>
+      <h3>Cache pressure</h3>
+      <p>Inflated intermediate tensors spill out of L1/L2 onto DRAM. On a Jetson Nano with 2 MB L2, this happens <strong style="color:var(--accent4)">constantly</strong>.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-card-icon">⚡</div>
+      <h3>Bandwidth cost</h3>
+      <p>DRAM reads are <strong style="color:var(--accent4)">100× slower</strong> than L1 cache. Every cache miss erases the arithmetic gain Winograd promised.</p>
+    </div>
+  </div>
+
+  <!-- Memory amplification visualizer -->
+  <div class="canvas-wrap reveal">
+    <div class="conv-vis-title" style="margin-bottom:32px">Memory amplification αmem(m) = (m+2)² / m² — intermediate data blowup per tile</div>
+    <div id="ampVis" class="amp-vis"></div>
+    <div class="tooltip-box">
+      The F(2,3) scheme inflates each tile's data by <strong style="color:var(--accent4)">4×</strong>. Larger tile sizes (m=6) improve arithmetic efficiency but still inflate by 1.78×. 
+      On devices with 1–2 MB L2 caches, this routinely causes working sets to exceed cache capacity entirely.
+    </div>
+  </div>
+
+  <!-- The static scheduling problem -->
+  <div class="labeled-divider reveal">
+    <div class="labeled-divider-line"></div>
+    <div class="labeled-divider-text">The real culprit: static scheduling</div>
+    <div class="labeled-divider-line reverse"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px" class="reveal">
+    <div class="problem-card" style="cursor:default">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-bottom:16px;letter-spacing:.1em;text-transform:uppercase">Current approaches</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px">
+          <span class="cross">✗</span>
+          <span>Tile size chosen at <strong>compile time</strong>, never updated</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px">
+          <span class="cross">✗</span>
+          <span>No explicit model of working-set vs cache capacity</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px">
+          <span class="cross">✗</span>
+          <span>A schedule tuned on one device fails on another</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px">
+          <span class="cross">✗</span>
+          <span>AutoTVM requires hours of on-device search per operator</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:14px">
+          <span class="cross">✗</span>
+          <span>No per-layer adaptation — one size fits all</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <!-- Working set diagram -->
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:24px">
+        <div class="conv-vis-title">Working-set vs L2 cache for (128×128) config</div>
+        <div id="wsVis" style="margin:16px 0"></div>
+        <div style="font-size:12px;color:var(--text2)">
+          Naive working-set model underestimates footprint by <span style="color:var(--accent4)">33.8%</span> — misses NEON spill buffers entirely, leading to cache thrash.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side-by-side comparison -->
+  <div class="canvas-wrap reveal" style="margin-top:48px">
+    <div class="conv-vis-title">State of the art — what's missing</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>System</th>
+          <th>Winograd</th>
+          <th>Runtime adaptive</th>
+          <th>Cache modelled</th>
+          <th>No offline tuning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>TVM AutoTVM</td><td><span class="partial">~</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td></tr>
+        <tr><td>ARM Compute Library</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Lavin & Gray (2016)</td><td><span class="check">✓</span></td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>Tiramisu</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="partial">~</span></td><td><span class="cross">✗</span></td></tr>
+        <tr class="highlight-row"><td><strong>CacheWinograd (ours)</strong></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ SECTION 3: SOLUTION ═══ -->
+<section id="solution" class="section">
+  <div class="section-number reveal">03 — The Solution</div>
+  <h2 class="section-title reveal">CacheWinograd:<br><em>three interlocked fixes</em></h2>
+  <p class="section-lead reveal">
+    The framework treats Winograd tile selection as a cache-constrained scheduling problem — solved at runtime, per layer, in nanoseconds.
+  </p>
+
+  <!-- 3-Phase Pipeline -->
+  <div class="pipeline reveal" id="pipelineVis">
+    <div class="pipe-stage stage1 active-stage" onclick="setPipeStage(0)">
+      <div class="pipe-num">PHASE 01</div>
+      <div class="pipe-title" style="color:var(--accent5)">Cache Probing</div>
+      <div class="pipe-desc">Read L1/L2 sizes from sysfs at init. Zero offline work.</div>
+    </div>
+    <div class="pipe-stage stage2" onclick="setPipeStage(1)">
+      <div class="pipe-num">PHASE 02</div>
+      <div class="pipe-title" style="color:var(--accent3)">Tile Selection</div>
+      <div class="pipe-desc">Per layer: solve constrained optimisation in O(1) time.</div>
+    </div>
+    <div class="pipe-stage stage3" onclick="setPipeStage(2)">
+      <div class="pipe-num">PHASE 03</div>
+      <div class="pipe-title" style="color:var(--accent)">Fused Execution</div>
+      <div class="pipe-desc">Channel-outer fusion eliminates intermediate tensor writes.</div>
+    </div>
+  </div>
+
+  <!-- Phase detail panels -->
+  <div id="pipe-detail-0" class="reveal" style="margin-bottom:32px">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">Phase 1 — Runtime cache probing (once at initialisation)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:20px 0">
+        <div style="background:var(--bg3);border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:20px">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent5);margin-bottom:8px">READ SYSFS</div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--text2)">/sys/devices/system/<br>cpu/cpu0/cache/<br>index<span style="color:var(--accent5)">1</span>/size</div>
+          <div style="margin-top:12px;font-size:18px;font-weight:600;color:var(--accent5)">CL1 = 32 KB</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:20px">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent5);margin-bottom:8px">READ SYSFS</div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--text2)">/sys/devices/system/<br>cpu/cpu0/cache/<br>index<span style="color:var(--accent5)">2</span>/size</div>
+          <div style="margin-top:12px;font-size:18px;font-weight:600;color:var(--accent5)">CL2 = 2 MB</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid rgba(110,231,183,0.2);border-radius:10px;padding:20px">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-bottom:8px">SCHEDULING BUDGET</div>
+          <div style="font-size:13px;color:var(--text2)">γ = 0.7<br><span style="color:var(--text3)">safety headroom</span></div>
+          <div style="margin-top:12px;font-size:18px;font-weight:600;color:var(--accent)">C<sub>cache</sub> = 1.4 MB</div>
+        </div>
+      </div>
+      <div class="tooltip-box">
+        Total cost: <span style="color:var(--accent5)">~20 µs</span> (two sysfs reads). Amortised over the entire inference session — this is one-time overhead that makes all subsequent per-layer decisions accurate without any offline profiling.
+      </div>
+    </div>
+  </div>
+
+  <div id="pipe-detail-1" style="display:none;margin-bottom:32px" class="reveal">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">Phase 2 — Adaptive tile selection (per layer, ~5 ns)</div>
+      
+      <div style="margin-bottom:24px">
+        <div style="font-size:14px;color:var(--text2);margin-bottom:16px">
+          For each candidate tile size, compute extended working-set including NEON spill buffers:
+        </div>
+        <div class="formula-box" style="margin:0 0 16px">
+          <span class="formula-highlight">WSext(m) = β(m+2)²Cin(1+g) + βm²Cout + 2β(m+2)²</span>
+          <br><span class="formula-dim">where β=4 (FP32), g=4 (128-bit NEON)</span>
+        </div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:16px">
+          Select the tile that maximises reuse efficiency <em>subject to fitting in cache:</em>
+        </div>
+        <div class="formula-box" style="margin:0">
+          <span class="formula-dim">m* = argmax</span>
+          <span class="formula-highlight"> Cout·m² / (m+2)² </span>
+          <span class="formula-dim">subject to WSext(m) ≤ γ·Ccache</span>
+        </div>
+      </div>
+
+      <!-- Interactive tile race -->
+      <div class="tile-race" id="tileRaceVis">
+        <div class="conv-vis-title">Tile candidates for Cin=64, Cout=64 on Jetson Nano (γCL2 = 1.4 MB)</div>
+        <!-- rendered by JS -->
+      </div>
+
+      <!-- Fallback guard -->
+      <div style="margin-top:20px;background:var(--bg3);border:1px solid rgba(248,113,113,0.2);border-radius:12px;padding:20px">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent4);margin-bottom:12px;letter-spacing:.1em">TWO-CONDITION FALLBACK GUARD</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div class="badge badge-red" style="margin-bottom:8px">Condition 1</div>
+            <div style="font-size:14px;color:var(--text2)">R(m*) &lt; R<sub>min</sub> (0.35)<br><span style="font-size:12px;color:var(--text3)">Reuse efficiency too low — transform overhead not amortised</span></div>
+          </div>
+          <div style="font-size:20px;color:var(--text3);align-self:center">OR</div>
+          <div style="flex:1;min-width:200px">
+            <div class="badge badge-red" style="margin-bottom:8px">Condition 2</div>
+            <div style="font-size:14px;color:var(--text2)">Cin × Cout &lt; 2048<br><span style="font-size:12px;color:var(--text3)">Insufficient channel depth — direct conv wins</span></div>
+          </div>
+          <div style="font-size:20px;color:var(--text3);align-self:center">→</div>
+          <div style="align-self:center">
+            <div class="badge badge-amber">Fallback to direct conv</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pipe-detail-2" style="display:none;margin-bottom:32px" class="reveal">
+    <div class="canvas-wrap">
+      <div class="conv-vis-title">Phase 3 — Fused channel-outer execution</div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+        <div>
+          <div class="badge badge-red" style="margin-bottom:12px">Naive pipeline</div>
+          <div id="naivePipelineVis"></div>
+        </div>
+        <div>
+          <div class="badge badge-green" style="margin-bottom:12px">Fused pipeline</div>
+          <div id="fusedPipelineVis"></div>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <span class="formula-dim">DRAM traffic eliminated per inference: </span>
+        <span class="formula-highlight">ΔFuse = 2·Cin·(m+2)²·β·⌈H'/m⌉·⌈W'/m⌉</span>
+        <br><span class="formula-dim">For Cin=64, H'=W'=56, m=4: ≈ </span><span class="formula-highlight">3.44 MB eliminated per inference pass</span>
+      </div>
+
+      <!-- Loop order visualiser -->
+      <div style="margin-top:20px">
+        <div class="conv-vis-title">Channel-outer loop order — X̂t stays resident in L2</div>
+        <div id="loopVis" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ SECTION 4: RESULTS ═══ -->
+<section id="results" class="section">
+  <div class="section-number reveal">04 — Results</div>
+  <h2 class="section-title reveal">Numbers that matter</h2>
+  <p class="section-lead reveal">
+    Evaluated on Jetson Nano and Raspberry Pi 4 across seven microbenchmark configurations and four CNN models. All measurements n=1000, p&lt;0.01.
+  </p>
+
+  <div class="result-grid reveal">
+    <div class="result-card">
+      <div class="result-val" style="color:var(--accent)">43<span class="result-unit">%</span></div>
+      <div class="result-label">Single-thread latency reduction<br><span style="color:var(--text3)">Jetson Nano, 64×64 config</span></div>
+    </div>
+    <div class="result-card">
+      <div class="result-val" style="color:var(--accent2)">33<span class="result-unit">%</span></div>
+      <div class="result-label">Multi-core latency reduction<br><span style="color:var(--text3)">Jetson Nano, 4-thread</span></div>
+    </div>
+    <div class="result-card">
+      <div class="result-val" style="color:var(--accent3)">5.5<span class="result-unit">%</span></div>
+      <div class="result-label">End-to-end energy savings<br><span style="color:var(--text3)">VGG16 on Jetson Nano</span></div>
+    </div>
+    <div class="result-card">
+      <div class="result-val" style="color:var(--accent5)">&lt;0.6<span class="result-unit">%</span></div>
+      <div class="result-label">Scheduling overhead<br><span style="color:var(--text3)">All models, all configs</span></div>
+    </div>
+  </div>
+
+  <!-- Three regimes -->
+  <div class="canvas-wrap reveal">
+    <div class="conv-vis-title" style="margin-bottom:24px">Three execution regimes — how configuration determines performance</div>
+    <div id="regimeVis"></div>
+  </div>
+
+  <!-- Cross platform -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px" class="reveal">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div style="width:8px;height:8px;background:var(--accent5);border-radius:50%"></div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--text2);letter-spacing:.05em">JETSON NANO · Cortex-A57 · 2 MB L2</div>
+      </div>
+      <div id="jetsonBars"></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div style="width:8px;height:8px;background:var(--accent3);border-radius:50%"></div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--text2);letter-spacing:.05em">RASPBERRY PI 4 · Cortex-A72 · 1 MB L2</div>
+      </div>
+      <div id="rpiBars"></div>
+    </div>
+  </div>
+
+  <!-- WSext validation -->
+  <div class="canvas-wrap reveal" style="margin-top:32px">
+    <div class="conv-vis-title" style="margin-bottom:20px">Working-set model accuracy — WSbase vs WSext vs measured</div>
+    <div id="wsAccuracyVis"></div>
+    <div class="tooltip-box" style="margin-top:16px">
+      For the 128×128 configuration, the baseline model <span style="color:var(--accent4)">underestimates</span> actual working set by 33.8% — causing cache thrash despite appearing to fit. 
+      The extended model including NEON spill buffers reduces error to <span style="color:var(--accent)">2.1%</span>.
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<footer>
+  <div style="margin-bottom:12px;font-family:var(--font-display);font-size:22px;color:var(--text2)">CacheWinograd</div>
+  <div>Cache-Aware Adaptive Tile Scheduling for Winograd on Edge CPUs</div>
+  <div style="margin-top:8px;color:var(--text3)">Research explainer · Visual deep dive · EMSOFT 2026 submission</div>
+</footer>
+
+<script>
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+function el(id){return document.getElementById(id)}
+function make(tag,props={}){
+  const e=document.createElement(tag);
+  Object.entries(props).forEach(([k,v])=>e[k]=v);
+  return e;
+}
+function makeCell(cls,text=''){
+  const d=document.createElement('div');
+  d.className='matrix-cell '+cls;
+  d.textContent=text;
+  return d;
+}
+
+// ─── STEP SWITCHER ───────────────────────────────────────────────────────────
+function setStep(prefix,idx){
+  document.querySelectorAll(`#${prefix==='w'?'winogradStepper':''} .step-btn`).forEach((b,i)=>{
+    b.classList.toggle('active',i===idx);
+  });
+  document.querySelectorAll(`[id^="${prefix}-step-"]`).forEach((s,i)=>{
+    s.classList.toggle('active',i===idx);
+  });
+}
+
+// ─── PIPE STAGE SWITCHER ──────────────────────────────────────────────────────
+function setPipeStage(idx){
+  document.querySelectorAll('.pipe-stage').forEach((s,i)=>{
+    s.classList.toggle('active-stage',i===idx);
+  });
+  [0,1,2].forEach(i=>{
+    const d=el(`pipe-detail-${i}`);
+    if(d) d.style.display=i===idx?'block':'none';
+  });
+}
+
+// ─── RENDER: DIRECT CONV ─────────────────────────────────────────────────────
+function renderDirectConv(){
+  const layout=el('directConvLayout');
+  if(!layout)return;
+  layout.innerHTML='';
+  const vals5=[3,1,4,1,5,9,2,6,5,3,5,8,9,7,9,3,2,3,8,4,6,2,6,4,3];
+  const g5=make('div');
+  g5.className='conv-grid g5';
+  vals5.forEach((v,i)=>{
+    const row=Math.floor(i/5),col=i%5;
+    const active=(row>=1&&row<=3&&col>=1&&col<=3);
+    g5.appendChild(makeCell(active?'cell-active':'cell-input',v));
+  });
+  const lbl1=make('div');
+  lbl1.innerHTML='<div class="conv-label">Input (5×5)</div>';
+  const w1=make('div');w1.appendChild(g5);w1.appendChild(lbl1);
+  
+  const op1=make('div');op1.className='conv-op';op1.textContent='*';
+  
+  const vals3=[1,0,-1,1,0,-1,1,0,-1];
+  const g3=make('div');g3.className='conv-grid g3';
+  vals3.forEach(v=>g3.appendChild(makeCell('cell-weight',v)));
+  const lbl2=make('div');lbl2.innerHTML='<div class="conv-label">Kernel (3×3)<br>9 MACs/output</div>';
+  const w2=make('div');w2.appendChild(g3);w2.appendChild(lbl2);
+  
+  const op2=make('div');op2.className='conv-op';op2.textContent='=';
+  
+  const g4=make('div');g4.className='conv-grid g4';
+  [12,8,3,7,9,4,2,11,6,8,5,9,3,7,4,8].forEach(v=>g4.appendChild(makeCell('cell-output',v)));
+  const lbl3=make('div');lbl3.innerHTML='<div class="conv-label">Output (3×3)<br>9 × 9 = 81 MACs</div>';
+  const w3=make('div');w3.appendChild(g4);w3.appendChild(lbl3);
+  
+  [w1,op1,w2,op2,w3].forEach(e=>layout.appendChild(e));
+}
+
+// ─── RENDER: WINOGRAD STEP GRIDS ─────────────────────────────────────────────
+function render4x4Grid(id,cls){
+  const g=el(id);if(!g)return;
+  g.className='conv-grid';g.style.gridTemplateColumns='repeat(4,36px)';
+  g.innerHTML='';
+  const vals=[4,7,2,8,1,5,9,3,6,2,4,7,3,8,1,5];
+  vals.forEach(v=>g.appendChild(makeCell(cls,v)));
+}
+function render3x3Grid(id,cls){
+  const g=el(id);if(!g)return;
+  g.className='conv-grid g3';g.innerHTML='';
+  const vals=[1,-1,1,2,0,-2,1,-1,1];
+  vals.forEach(v=>g.appendChild(makeCell(cls,v)));
+}
+function render2x2Grid(id,cls){
+  const g=el(id);if(!g)return;
+  g.className='conv-grid';g.style.gridTemplateColumns='repeat(2,36px)';g.innerHTML='';
+  [12,8,9,4].forEach(v=>g.appendChild(makeCell(cls,v)));
+}
+
+// ─── RENDER: MEMORY AMPLIFICATION ───────────────────────────────────────────
+function renderAmpVis(){
+  const vis=el('ampVis');if(!vis)return;
+  vis.innerHTML='';
+  const data=[
+    {m:2,alpha:4.0,label:'F(2,3)\nm=2',color:'#f87171'},
+    {m:4,alpha:2.25,label:'F(4,3)\nm=4',color:'#f59e0b'},
+    {m:6,alpha:1.78,label:'F(6,3)\nm=6',color:'#fbbf24'},
+    {m:1,alpha:1.0,label:'Direct\nconv',color:'#6ee7b7'}
+  ];
+  const maxH=160;
+  data.forEach(d=>{
+    const grp=make('div');grp.className='amp-bar-group';
+    const bar=make('div');
+    bar.className='amp-bar';
+    bar.style.height=(d.alpha/4.0*maxH)+'px';
+    bar.style.background=`linear-gradient(180deg, ${d.color}33, ${d.color}22)`;
+    bar.style.border=`1px solid ${d.color}44`;
+    const val=make('div');val.className='amp-bar-val';
+    val.style.color=d.color;
+    val.textContent=d.alpha+'×';
+    bar.appendChild(val);
+    const lbl=make('div');lbl.className='amp-bar-label';
+    lbl.style.whiteSpace='pre-line';lbl.textContent=d.label;
+    grp.appendChild(bar);grp.appendChild(lbl);
+    vis.appendChild(grp);
+  });
+}
+
+// ─── RENDER: WORKING SET VIS ──────────────────────────────────────────────────
+function renderWSVis(){
+  const vis=el('wsVis');if(!vis)return;
+  const l2=2*1024*1024;
+  const budget=l2*0.7;
+  const wsbase=140416;
+  const wsmeas=187904;
+  const wsext=143360;
+  const items=[
+    {label:'WSbase (naive model)',val:wsbase,color:'var(--accent4)',pct:wsbase/wsmeas*100},
+    {label:'WSmeas (actual)',val:wsmeas,color:'var(--accent3)',pct:100},
+    {label:'WSext (our model)',val:wsext,color:'var(--accent)',pct:wsext/wsmeas*100},
+    {label:'Cache budget γ×CL2',val:budget,color:'var(--accent5)',pct:budget/wsmeas*100},
+  ];
+  vis.innerHTML='';
+  items.forEach(item=>{
+    const row=make('div');row.style.cssText='margin-bottom:12px';
+    const top=make('div');
+    top.style.cssText='display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px';
+    top.innerHTML=`<span style="color:var(--text2)">${item.label}</span><span style="color:${item.color};font-family:var(--font-mono)">${(item.val/1024).toFixed(0)} KB</span>`;
+    const track=make('div');
+    track.style.cssText='height:10px;background:var(--surface2);border-radius:5px;overflow:hidden';
+    const fill=make('div');
+    fill.style.cssText=`height:100%;width:${Math.min(item.pct,100)}%;background:${item.color};border-radius:5px;opacity:0.7;transition:width .8s`;
+    track.appendChild(fill);row.appendChild(top);row.appendChild(track);
+    vis.appendChild(row);
+  });
+}
+
+// ─── RENDER: TILE RACE ────────────────────────────────────────────────────────
+function renderTileRace(){
+  const vis=el('tileRaceVis');if(!vis)return;
+  const title=vis.querySelector('.conv-vis-title');
+  vis.innerHTML='';
+  if(title)vis.appendChild(title);
+  const budget=1.4*1024*1024;
+  const cin=64,cout=64,beta=4,g=4;
+  const tiles=[2,4,6];
+  tiles.forEach(m=>{
+    const base=beta*(m+2)*(m+2)*cin*(1+g)+beta*m*m*cout;
+    const aux=2*beta*(m+2)*(m+2);
+    const ws=base+aux;
+    const r=cout*m*m/((m+2)*(m+2));
+    const fits=ws<=budget;
+    const pct=Math.min(ws/budget*100,120);
+    const isOpt=(m===6&&fits)||(m===4&&!tiles.slice(tiles.indexOf(m)+1).some(mm=>{const b2=beta*(mm+2)*(mm+2)*cin*(1+g)+beta*mm*mm*cout;return b2+2*beta*(mm+2)*(mm+2)<=budget}));
+    const selLabel=m===6&&fits?' ★ selected':'';
+    const row=make('div');row.className='tile-row-vis';
+    const lbl=make('div');lbl.className='tile-label-vis';lbl.textContent='m = '+m;
+    const track=make('div');track.className='tile-bar-track';
+    const fill=make('div');fill.className='tile-bar-fill'+(selLabel?' selected':'');
+    fill.style.width=(Math.min(pct,100))+'%';
+    const color=!fits?'rgba(248,113,113,0.3)':selLabel?'rgba(110,231,183,0.3)':'rgba(129,140,248,0.3)';
+    fill.style.background=color;
+    fill.style.color=!fits?'var(--accent4)':selLabel?'var(--accent)':'var(--accent2)';
+    fill.textContent=(ws/1024).toFixed(0)+' KB'+selLabel;
+    const tag=make('span');tag.className='tile-tag';
+    if(!fits){tag.style.background='rgba(248,113,113,0.1)';tag.style.color='var(--accent4)';tag.textContent='exceeds budget';}
+    else if(selLabel){tag.style.background='rgba(110,231,183,0.1)';tag.style.color='var(--accent)';tag.textContent='R='+r.toFixed(2)+' ← optimal';}
+    else{tag.style.background='rgba(129,140,248,0.1)';tag.style.color='var(--accent2)';tag.textContent='R='+r.toFixed(2)+' fits';}
+    track.appendChild(fill);
+    row.appendChild(lbl);row.appendChild(track);row.appendChild(tag);
+    vis.appendChild(row);
+  });
+  const budgetLine=make('div');
+  budgetLine.style.cssText='margin-top:12px;display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--accent5)';
+  budgetLine.innerHTML='<div style="width:40px;height:1px;background:var(--accent5)"></div> Cache budget: 1.4 MB (γ=0.7 × 2 MB L2)';
+  vis.appendChild(budgetLine);
+}
+
+// ─── RENDER: NAIVE vs FUSED PIPELINE ─────────────────────────────────────────
+function renderPipelines(){
+  const naive=el('naivePipelineVis');
+  const fused=el('fusedPipelineVis');
+  if(!naive||!fused)return;
+  const stages=[
+    {label:'Input transform',sub:'B⊤XB',color:'var(--accent5)'},
+    {label:'Intermediate tensor',sub:'Write to DRAM →',color:'var(--accent4)',dram:true},
+    {label:'Weight transform',sub:'GWG⊤',color:'var(--accent3)'},
+    {label:'Intermediate tensor',sub:'Write to DRAM →',color:'var(--accent4)',dram:true},
+    {label:'Element-wise multiply',sub:'X̂ ⊙ Ŵ',color:'var(--accent2)'},
+    {label:'Intermediate tensor',sub:'Write to DRAM →',color:'var(--accent4)',dram:true},
+    {label:'Inverse transform',sub:'A⊤(·)A',color:'var(--accent)'},
+  ];
+  const fusedStages=[
+    {label:'Input transform',sub:'B⊤XB → L2 resident',color:'var(--accent5)'},
+    {label:'Weight transform',sub:'GWG⊤ (precomputed)',color:'var(--accent3)'},
+    {label:'Fused: multiply + inverse',sub:'All output channels → Y',color:'var(--accent)'},
+  ];
+  function renderStages(container,arr){
+    container.innerHTML='';
+    arr.forEach((s,i)=>{
+      const box=make('div');
+      box.style.cssText=`padding:10px 14px;border-radius:8px;margin-bottom:6px;border:1px solid;font-size:13px;`
+        +(s.dram?`background:rgba(248,113,113,0.05);border-color:rgba(248,113,113,0.2);`:`background:${s.color}11;border-color:${s.color}33;`);
+      box.innerHTML=`<div style="font-weight:500;color:${s.dram?'var(--accent4)':s.color}">${s.label}</div>`
+        +`<div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);margin-top:2px">${s.sub}</div>`;
+      container.appendChild(box);
+      if(i<arr.length-1){
+        const arr2=make('div');arr2.style.cssText='text-align:center;color:var(--text3);font-size:14px;margin-bottom:4px;';arr2.textContent='↓';
+        container.appendChild(arr2);
+      }
+    });
+  }
+  renderStages(naive,stages);
+  renderStages(fused,fusedStages);
+}
+
+// ─── RENDER: LOOP VIS ─────────────────────────────────────────────────────────
+function renderLoopVis(){
+  const vis=el('loopVis');if(!vis)return;
+  vis.innerHTML='';
+  const html=`
+    <div style="display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:start">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-bottom:8px">LOOP ORDER</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--font-mono);font-size:12px;line-height:2">
+          <span style="color:var(--accent5)">for</span> tile t <span style="color:var(--accent5)">in</span> T:<br>
+          &nbsp;&nbsp;<span style="color:var(--accent3)">X̂t</span> = B⊤XtB<br>
+          &nbsp;&nbsp;<span style="color:var(--text3)"># X̂t now in L2</span><br>
+          &nbsp;&nbsp;<span style="color:var(--accent5)">for</span> c <span style="color:var(--accent5)">in</span> Cout:<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;Ŷt,c = <span style="color:var(--accent3)">X̂t</span> ⊙ Ŵc<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;Yt,c = A⊤Ŷt,cA
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-bottom:8px">X̂t RESIDENCY — amortised across all Cout channels</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px">
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:12px">
+            ${Array.from({length:16},(_,i)=>`<div style="width:28px;height:28px;border-radius:4px;background:rgba(110,231,183,${0.1+i*0.05});border:1px solid rgba(110,231,183,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:9px;color:var(--accent)">c${i}</div>`).join('')}
+          </div>
+          <div style="font-size:12px;color:var(--text2)">
+            X̂t loaded <span style="color:var(--accent)">once</span> into L2, then reused across all 16 output channels. 
+            Cost amortised by factor of <span style="color:var(--accent)">Cout = 64</span>.
+          </div>
+        </div>
+      </div>
+    </div>`;
+  vis.innerHTML=html;
+}
+
+// ─── RENDER: REGIME VIS ───────────────────────────────────────────────────────
+function renderRegimeVis(){
+  const vis=el('regimeVis');if(!vis)return;
+  const configs=[
+    {label:'16×32',prod:512,gain:-48.72,regime:'overhead'},
+    {label:'32×16',prod:512,gain:-34.87,regime:'overhead'},
+    {label:'32×32',prod:1024,gain:-26.79,regime:'overhead'},
+    {label:'32×64',prod:2048,gain:+20.22,regime:'efficient'},
+    {label:'64×32',prod:2048,gain:+6.44,regime:'efficient'},
+    {label:'64×64',prod:4096,gain:+43.12,regime:'efficient'},
+    {label:'128×128',prod:16384,gain:-6.52,regime:'membound'},
+  ];
+  const maxAbs=Math.max(...configs.map(c=>Math.abs(c.gain)));
+  vis.innerHTML='';
+  const wrap=make('div');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:8px';
+  configs.forEach(c=>{
+    const row=make('div');
+    row.style.cssText='display:flex;align-items:center;gap:12px';
+    const lbl=make('div');lbl.style.cssText='font-family:var(--font-mono);font-size:12px;color:var(--text2);width:64px;text-align:right';lbl.textContent=c.label;
+    const track=make('div');track.style.cssText='flex:1;height:32px;background:var(--surface);border-radius:6px;position:relative;overflow:hidden';
+    const fill=make('div');
+    const isPos=c.gain>0;
+    const color=c.regime==='overhead'?'var(--accent4)':c.regime==='efficient'?'var(--accent)':'var(--accent3)';
+    const pct=Math.abs(c.gain)/maxAbs*90;
+    fill.style.cssText=`position:absolute;${isPos?'left:50%':'right:50%'};height:100%;width:${pct}%;background:${color}33;border:1px solid ${color}55;border-radius:${isPos?'0 6px 6px 0':'6px 0 0 6px'}`;
+    const val=make('div');
+    val.style.cssText=`position:absolute;${isPos?'left:calc(50% + 4px)':'right:calc(50% + 4px)'};top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:11px;color:${color}`;
+    val.textContent=(isPos?'+':'')+c.gain+'%';
+    const regime=make('div');
+    regime.className='badge '+(c.regime==='overhead'?'badge-red':c.regime==='efficient'?'badge-green':'badge-amber');
+    regime.style.cssText='min-width:100px;justify-content:center;font-size:10px';
+    regime.textContent=c.regime==='overhead'?'overhead':c.regime==='efficient'?'efficient':'mem-bound';
+    track.appendChild(fill);track.appendChild(val);
+    row.appendChild(lbl);row.appendChild(track);row.appendChild(regime);
+    wrap.appendChild(row);
+  });
+  // midline
+  vis.appendChild(wrap);
+}
+
+// ─── RENDER: PLATFORM BARS ───────────────────────────────────────────────────
+function renderPlatformBars(id,data,color){
+  const vis=el(id);if(!vis)return;
+  vis.innerHTML='';
+  data.forEach(d=>{
+    const row=make('div');row.style.cssText='margin-bottom:14px';
+    const top=make('div');top.style.cssText='display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px';
+    top.innerHTML=`<span style="color:var(--text2)">${d.label}</span><span style="font-family:var(--font-mono);color:${color}">${d.val>0?'+':''}${d.val}%</span>`;
+    const track=make('div');track.style.cssText='height:8px;background:var(--surface2);border-radius:4px;overflow:visible;position:relative';
+    const fill=make('div');
+    const pct=Math.abs(d.val)/50*100;
+    fill.style.cssText=`height:100%;width:${Math.min(pct,100)}%;background:${d.val>0?color:'var(--accent4)'};border-radius:4px;opacity:0.7`;
+    track.appendChild(fill);row.appendChild(top);row.appendChild(track);
+    vis.appendChild(row);
+  });
+}
+
+// ─── RENDER: WS ACCURACY ─────────────────────────────────────────────────────
+function renderWSAccuracy(){
+  const vis=el('wsAccuracyVis');if(!vis)return;
+  const data=[
+    {config:'16×32',base:18560,meas:18980,ext:18880},
+    {config:'32×32',base:35968,meas:36224,ext:37120},
+    {config:'64×64',base:70784,meas:72192,ext:74880},
+    {config:'128×128',base:140416,meas:187904,ext:143360},
+  ];
+  vis.innerHTML='';
+  const wrap=make('div');wrap.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:12px';
+  data.forEach(d=>{
+    const card=make('div');card.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px';
+    const maxVal=Math.max(d.base,d.meas,d.ext);
+    const errBase=((d.meas-d.base)/d.meas*100).toFixed(1);
+    const errExt=((Math.abs(d.ext-d.meas))/d.meas*100).toFixed(1);
+    card.innerHTML=`<div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-bottom:12px">${d.config}</div>`;
+    [
+      {label:'WSbase',val:d.base,color:'var(--accent4)'},
+      {label:'WSmeas',val:d.meas,color:'var(--accent3)'},
+      {label:'WSext',val:d.ext,color:'var(--accent)'},
+    ].forEach(item=>{
+      const rw=make('div');rw.style.cssText='margin-bottom:8px';
+      const lbl=make('div');lbl.style.cssText='display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px';
+      lbl.innerHTML=`<span style="color:var(--text3)">${item.label}</span><span style="color:${item.color};font-family:var(--font-mono)">${(item.val/1024).toFixed(0)}K</span>`;
+      const t=make('div');t.style.cssText='height:6px;background:var(--surface2);border-radius:3px;overflow:hidden';
+      const f=make('div');f.style.cssText=`height:100%;width:${item.val/maxVal*100}%;background:${item.color};opacity:.7;border-radius:3px`;
+      t.appendChild(f);rw.appendChild(lbl);rw.appendChild(t);card.appendChild(rw);
+    });
+    const errs=make('div');errs.style.cssText='margin-top:10px;padding-top:10px;border-top:1px solid var(--border)';
+    errs.innerHTML=`<div style="font-size:10px;color:var(--accent4);font-family:var(--font-mono)">base err: ${errBase}%</div>`
+      +`<div style="font-size:10px;color:var(--accent);font-family:var(--font-mono)">ext err: ${errExt}%</div>`;
+    card.appendChild(errs);
+    wrap.appendChild(card);
+  });
+  vis.appendChild(wrap);
+}
+
+// ─── REVEAL ON SCROLL ─────────────────────────────────────────────────────────
+function initReveal(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+  },{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderDirectConv();
+  render4x4Grid('inputTileGrid','cell-input');
+  render4x4Grid('transformedGrid','cell-transform');
+  render3x3Grid('weightGrid','cell-weight');
+  render4x4Grid('xhatGrid','cell-transform');
+  render4x4Grid('whatGrid','cell-weight');
+  render4x4Grid('elemwiseGrid','cell-active');
+  render4x4Grid('prodGrid','cell-active');
+  render2x2Grid('outputGrid','cell-output');
+  renderAmpVis();
+  renderWSVis();
+  renderTileRace();
+  renderPipelines();
+  renderLoopVis();
+  renderRegimeVis();
+  renderPlatformBars('jetsonBars',[
+    {label:'32×64',val:20.22},
+    {label:'64×32',val:6.44},
+    {label:'64×64',val:43.12},
+  ],'var(--accent5)');
+  renderPlatformBars('rpiBars',[
+    {label:'32×64',val:17.33},
+    {label:'64×32',val:6.41},
+    {label:'64×64',val:36.00},
+  ],'var(--accent3)');
+  renderWSAccuracy();
+  initReveal();
+
+  // Animate amp bars on scroll
+  const ampObs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.querySelectorAll('.amp-bar').forEach((b,i)=>{
+          b.style.opacity='0';b.style.transform='scaleY(0)';b.style.transformOrigin='bottom';
+          setTimeout(()=>{b.style.opacity='1';b.style.transform='scaleY(1)'},i*120);
+        });
+        ampObs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.3});
+  const ampVis=el('ampVis');
+  if(ampVis)ampObs.observe(ampVis);
+});
+</script>
+</body>
+</html>
