@@ -4,6 +4,7 @@ import WinogradSection from './components/WinogradSection/WinogradSection'
 import ProblemSection from './components/ProblemSection/ProblemSection'
 import SolutionSection from './components/SolutionSection/SolutionSection'
 import ResultsSection from './components/ResultsSection/ResultsSection'
+import DIPSection from './components/DIPSection/DIPSection'
 import Footer from './components/Footer'
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
         <SolutionSection />
         <hr className="divider" />
         <ResultsSection />
+        <hr className="divider" />
+        <DIPSection />
         <hr className="divider" />
       </main>
       <Footer />

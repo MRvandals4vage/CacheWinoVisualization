@@ -12,6 +12,7 @@ const Navbar: React.FC = () => {
         <li><a href="#problem"><div className="nav-dot"></div><span>DIAGNOSTICS</span></a></li>
         <li><a href="#solution"><div className="nav-dot"></div><span>OPTIMIZATION</span></a></li>
         <li><a href="#results"><div className="nav-dot"></div><span>METRICS</span></a></li>
+        <li><a href="#dip-playground"><div className="nav-dot"></div><span>DIP LAB</span></a></li>
       </ul>
       <div className="nav-pill">REV 2026.04</div>
     </nav>

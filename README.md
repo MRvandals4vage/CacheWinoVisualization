@@ -60,7 +60,7 @@ This project visualizes how **CacheWinograd** solves this by:
    npm run build
    ```
 
-## 📐 Architecture
+##  Architecture
 
 The project is structured into modular sections representing the research flow:
 - `/components/Hero`: Project introduction.
@@ -69,7 +69,7 @@ The project is structured into modular sections representing the research flow:
 - `/components/SolutionSection`: The CacheWinograd pipeline + Matrix Flow.
 - `/components/ResultsSection`: Quantitative benchmarks.
 
-## 📄 License
+##  License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
